@@ -16,6 +16,18 @@ law natural_le_transitive:
   for bc: N.Natural.Le(b, c)
   N.Natural.Le(a, c)
 
+law natural_le_add_right:
+  for a: Nat
+  for b: Nat
+  N.Natural.Le(a, Nat.add(a, b))
+
+law natural_le_add_both_left:
+  for c: Nat
+  for a: Nat
+  for b: Nat
+  for proof: N.Natural.Le(a, b)
+  N.Natural.Le(Nat.add(c, a), Nat.add(c, b))
+
 law natural_add_zero:
   for n: Nat
   {Nat.add(n, 0n) == n : Nat}
@@ -42,6 +54,12 @@ law natural_mul_one:
 law natural_one_mul:
   for n: Nat
   {Nat.mul(1n, n) == n : Nat}
+
+law natural_mul_add_left:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  {Nat.mul(Nat.add(a, b), c) == Nat.add(Nat.mul(a, c), Nat.mul(b, c)) : Nat}
 
 law integer_neg_involutive:
   for x: Z.Integer

@@ -25,6 +25,20 @@ def Natural.zero_le(n: Nat) -> Natural.Le(0n, n):
     case 1n+p:
       Unit{}
 
+def Natural.le_add_right(a: Nat, +b: Nat) -> Natural.Le(a, Nat.add(a, b)):
+  match a:
+    case 0n:
+      Natural.zero_le(b)
+    case 1n+p:
+      Natural.le_add_right(p, b)
+
+def Natural.le_add_both_left(c: Nat, a: Nat, b: Nat, proof: Natural.Le(a, b)) -> Natural.Le(Nat.add(c, a), Nat.add(c, b)):
+  match c:
+    case 0n:
+      proof
+    case 1n+p:
+      Natural.le_add_both_left(p, a, b, proof)
+
 def Natural.le_transitive(a: Nat, b: Nat, c: Nat, ab: Natural.Le(a, b), bc: Natural.Le(b, c)) -> Natural.Le(a, c):
   match a:
     case 0n:
@@ -90,3 +104,18 @@ def Natural.mul_one(n: Nat) -> {Nat.mul(n, 1n) == n : Nat}:
 
 def Natural.one_mul(n: Nat) -> {Nat.mul(1n, n) == n : Nat}:
   Natural.add_zero(n)
+
+def Natural.mul_add_left(a: Nat, +b: Nat, +c: Nat) -> {Nat.mul(Nat.add(a, b), c) == Nat.add(Nat.mul(a, c), Nat.mul(b, c)) : Nat}:
+  match a:
+    case 0n:
+      {==}
+    case 1n++p:
+      Equal.trans(Nat,
+        Nat.add(c, Nat.mul(Nat.add(p, b), c)),
+        Nat.add(c, Nat.add(Nat.mul(p, c), Nat.mul(b, c))),
+        Nat.add(Nat.add(c, Nat.mul(p, c)), Nat.mul(b, c)),
+        Equal.cong(Nat, Nat, z => Nat.add(c, z), Nat.mul(Nat.add(p, b), c), Nat.add(Nat.mul(p, c), Nat.mul(b, c)), Natural.mul_add_left(p, b, c)),
+        Equal.sym(Nat,
+          Nat.add(Nat.add(c, Nat.mul(p, c)), Nat.mul(b, c)),
+          Nat.add(c, Nat.add(Nat.mul(p, c), Nat.mul(b, c))),
+          Natural.add_associative(c, Nat.mul(p, c), Nat.mul(b, c))))

@@ -22,6 +22,7 @@ jobs:
         with:
           bun-version: 1.2.22
       - run: bun bend/bend2/main.ts PROOF.bend --check-only
+      - run: bun bend/bend2/main.ts tests/arithmetic.bend --check-only
       - name: Reject a non-Cauchy sequence
         run: |
           if output=$(bun bend/bend2/main.ts tests/non_cauchy.bend --check-only 2>&1); then

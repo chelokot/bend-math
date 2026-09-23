@@ -11,6 +11,12 @@ def Laws.natural_le_reflexive(n):
 def Laws.natural_le_transitive(a, b, c, ab, bc):
   N.Natural.le_transitive(a, b, c, ab, bc)
 
+def Laws.natural_le_add_right(a, b):
+  N.Natural.le_add_right(a, b)
+
+def Laws.natural_le_add_both_left(c, a, b, proof):
+  N.Natural.le_add_both_left(c, a, b, proof)
+
 def Laws.natural_add_zero(n):
   N.Natural.add_zero(n)
 
@@ -28,6 +34,9 @@ def Laws.natural_mul_one(n):
 
 def Laws.natural_one_mul(n):
   N.Natural.one_mul(n)
+
+def Laws.natural_mul_add_left(a, b, c):
+  N.Natural.mul_add_left(a, b, c)
 
 def Laws.integer_neg_involutive(x):
   Z.Integer.neg_involutive(x)
