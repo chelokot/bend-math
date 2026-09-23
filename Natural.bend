@@ -99,6 +99,37 @@ def Natural.add_associative(a: Nat, +b: Nat, +c: Nat) -> {Nat.add(Nat.add(a, b),
     case 1n+p:
       Equal.cong(Nat, Nat, z => 1n+z, Nat.add(Nat.add(p, b), c), Nat.add(p, Nat.add(b, c)), Natural.add_associative(p, b, c))
 
+def Natural.predecessor(n: Nat) -> Nat:
+  match n:
+    case 0n:
+      0n
+    case 1n+p:
+      p
+
+def Natural.successor_injective(+a: Nat, +b: Nat, proof: {1n+a == 1n+b : Nat}) -> {a == b : Nat}:
+  Equal.cong(Nat, Nat, Natural.predecessor, 1n+a, 1n+b, proof)
+
+def Natural.add_left_cancel(c: Nat, +a: Nat, +b: Nat, proof: {Nat.add(c, a) == Nat.add(c, b) : Nat}) -> {a == b : Nat}:
+  match c:
+    case 0n:
+      proof
+    case 1n++p:
+      Natural.add_left_cancel(p, a, b, Natural.successor_injective(Nat.add(p, a), Nat.add(p, b), proof))
+
+def Natural.add_right_cancel(+a: Nat, +b: Nat, +c: Nat, proof: {Nat.add(a, c) == Nat.add(b, c) : Nat}) -> {a == b : Nat}:
+  Natural.add_left_cancel(c, a, b,
+    Equal.trans(Nat,
+      Nat.add(c, a),
+      Nat.add(a, c),
+      Nat.add(c, b),
+      Natural.add_commutative(c, a),
+      Equal.trans(Nat,
+        Nat.add(a, c),
+        Nat.add(b, c),
+        Nat.add(c, b),
+        proof,
+        Equal.sym(Nat, Nat.add(c, b), Nat.add(b, c), Natural.add_commutative(c, b)))))
+
 def Natural.add_swap(+a: Nat, +b: Nat, +c: Nat) -> {Nat.add(a, Nat.add(b, c)) == Nat.add(b, Nat.add(a, c)) : Nat}:
   Equal.trans(Nat,
     Nat.add(a, Nat.add(b, c)),

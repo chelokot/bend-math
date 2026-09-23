@@ -29,6 +29,12 @@ def Laws.natural_add_commutative(a, b):
 def Laws.natural_add_associative(a, b, c):
   N.Natural.add_associative(a, b, c)
 
+def Laws.natural_add_left_cancel(c, a, b, proof):
+  N.Natural.add_left_cancel(c, a, b, proof)
+
+def Laws.natural_add_right_cancel(a, b, c, proof):
+  N.Natural.add_right_cancel(a, b, c, proof)
+
 def Laws.natural_mul_zero(n):
   N.Natural.mul_zero(n)
 

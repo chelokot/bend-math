@@ -50,6 +50,20 @@ law natural_add_associative:
   for c: Nat
   {Nat.add(Nat.add(a, b), c) == Nat.add(a, Nat.add(b, c)) : Nat}
 
+law natural_add_left_cancel:
+  for c: Nat
+  for a: Nat
+  for b: Nat
+  for proof: {Nat.add(c, a) == Nat.add(c, b) : Nat}
+  {a == b : Nat}
+
+law natural_add_right_cancel:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  for proof: {Nat.add(a, c) == Nat.add(b, c) : Nat}
+  {a == b : Nat}
+
 law natural_mul_zero:
   for n: Nat
   {Nat.mul(n, 0n) == 0n : Nat}
