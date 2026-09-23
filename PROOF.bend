@@ -38,6 +38,15 @@ def Laws.natural_one_mul(n):
 def Laws.natural_mul_add_left(a, b, c):
   N.Natural.mul_add_left(a, b, c)
 
+def Laws.natural_mul_commutative(a, b):
+  N.Natural.mul_commutative(a, b)
+
+def Laws.natural_mul_associative(a, b, c):
+  N.Natural.mul_associative(a, b, c)
+
+def Laws.natural_mul_add_right(a, b, c):
+  N.Natural.mul_add_right(a, b, c)
+
 def Laws.integer_neg_involutive(x):
   Z.Integer.neg_involutive(x)
 

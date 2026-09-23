@@ -88,6 +88,19 @@ def Natural.add_associative(a: Nat, +b: Nat, +c: Nat) -> {Nat.add(Nat.add(a, b),
     case 1n+p:
       Equal.cong(Nat, Nat, z => 1n+z, Nat.add(Nat.add(p, b), c), Nat.add(p, Nat.add(b, c)), Natural.add_associative(p, b, c))
 
+def Natural.add_swap(+a: Nat, +b: Nat, +c: Nat) -> {Nat.add(a, Nat.add(b, c)) == Nat.add(b, Nat.add(a, c)) : Nat}:
+  Equal.trans(Nat,
+    Nat.add(a, Nat.add(b, c)),
+    Nat.add(Nat.add(a, b), c),
+    Nat.add(b, Nat.add(a, c)),
+    Equal.sym(Nat, Nat.add(Nat.add(a, b), c), Nat.add(a, Nat.add(b, c)), Natural.add_associative(a, b, c)),
+    Equal.trans(Nat,
+      Nat.add(Nat.add(a, b), c),
+      Nat.add(Nat.add(b, a), c),
+      Nat.add(b, Nat.add(a, c)),
+      Equal.cong(Nat, Nat, z => Nat.add(z, c), Nat.add(a, b), Nat.add(b, a), Natural.add_commutative(a, b)),
+      Natural.add_associative(b, a, c)))
+
 def Natural.mul_zero(n: Nat) -> {Nat.mul(n, 0n) == 0n : Nat}:
   match n:
     case 0n:
@@ -119,3 +132,57 @@ def Natural.mul_add_left(a: Nat, +b: Nat, +c: Nat) -> {Nat.mul(Nat.add(a, b), c)
           Nat.add(Nat.add(c, Nat.mul(p, c)), Nat.mul(b, c)),
           Nat.add(c, Nat.add(Nat.mul(p, c), Nat.mul(b, c))),
           Natural.add_associative(c, Nat.mul(p, c), Nat.mul(b, c))))
+
+def Natural.mul_successor_right(a: Nat, +b: Nat) -> {Nat.mul(a, 1n+b) == Nat.add(a, Nat.mul(a, b)) : Nat}:
+  match a:
+    case 0n:
+      {==}
+    case 1n++p:
+      Equal.trans(Nat,
+        Nat.add(1n+b, Nat.mul(p, 1n+b)),
+        Nat.add(1n+b, Nat.add(p, Nat.mul(p, b))),
+        Nat.add(1n+p, Nat.add(b, Nat.mul(p, b))),
+        Equal.cong(Nat, Nat, z => Nat.add(1n+b, z), Nat.mul(p, 1n+b), Nat.add(p, Nat.mul(p, b)), Natural.mul_successor_right(p, b)),
+        Equal.cong(Nat, Nat, z => 1n+z, Nat.add(b, Nat.add(p, Nat.mul(p, b))), Nat.add(p, Nat.add(b, Nat.mul(p, b))), Natural.add_swap(b, p, Nat.mul(p, b))))
+
+def Natural.mul_commutative(a: Nat, +b: Nat) -> {Nat.mul(a, b) == Nat.mul(b, a) : Nat}:
+  match a:
+    case 0n:
+      Equal.sym(Nat, Nat.mul(b, 0n), 0n, Natural.mul_zero(b))
+    case 1n++p:
+      Equal.trans(Nat,
+        Nat.add(b, Nat.mul(p, b)),
+        Nat.add(b, Nat.mul(b, p)),
+        Nat.mul(b, 1n+p),
+        Equal.cong(Nat, Nat, z => Nat.add(b, z), Nat.mul(p, b), Nat.mul(b, p), Natural.mul_commutative(p, b)),
+        Equal.sym(Nat, Nat.mul(b, 1n+p), Nat.add(b, Nat.mul(b, p)), Natural.mul_successor_right(b, p)))
+
+def Natural.mul_associative(a: Nat, +b: Nat, +c: Nat) -> {Nat.mul(Nat.mul(a, b), c) == Nat.mul(a, Nat.mul(b, c)) : Nat}:
+  match a:
+    case 0n:
+      {==}
+    case 1n++p:
+      Equal.trans(Nat,
+        Nat.mul(Nat.add(b, Nat.mul(p, b)), c),
+        Nat.add(Nat.mul(b, c), Nat.mul(Nat.mul(p, b), c)),
+        Nat.add(Nat.mul(b, c), Nat.mul(p, Nat.mul(b, c))),
+        Natural.mul_add_left(b, Nat.mul(p, b), c),
+        Equal.cong(Nat, Nat, z => Nat.add(Nat.mul(b, c), z), Nat.mul(Nat.mul(p, b), c), Nat.mul(p, Nat.mul(b, c)), Natural.mul_associative(p, b, c)))
+
+def Natural.mul_add_right(+a: Nat, +b: Nat, +c: Nat) -> {Nat.mul(a, Nat.add(b, c)) == Nat.add(Nat.mul(a, b), Nat.mul(a, c)) : Nat}:
+  Equal.trans(Nat,
+    Nat.mul(a, Nat.add(b, c)),
+    Nat.mul(Nat.add(b, c), a),
+    Nat.add(Nat.mul(a, b), Nat.mul(a, c)),
+    Natural.mul_commutative(a, Nat.add(b, c)),
+    Equal.trans(Nat,
+      Nat.mul(Nat.add(b, c), a),
+      Nat.add(Nat.mul(b, a), Nat.mul(c, a)),
+      Nat.add(Nat.mul(a, b), Nat.mul(a, c)),
+      Natural.mul_add_left(b, c, a),
+      Equal.trans(Nat,
+        Nat.add(Nat.mul(b, a), Nat.mul(c, a)),
+        Nat.add(Nat.mul(a, b), Nat.mul(c, a)),
+        Nat.add(Nat.mul(a, b), Nat.mul(a, c)),
+        Equal.cong(Nat, Nat, z => Nat.add(z, Nat.mul(c, a)), Nat.mul(b, a), Nat.mul(a, b), Natural.mul_commutative(b, a)),
+        Equal.cong(Nat, Nat, z => Nat.add(Nat.mul(a, b), z), Nat.mul(c, a), Nat.mul(a, c), Natural.mul_commutative(c, a)))))

@@ -61,6 +61,23 @@ law natural_mul_add_left:
   for c: Nat
   {Nat.mul(Nat.add(a, b), c) == Nat.add(Nat.mul(a, c), Nat.mul(b, c)) : Nat}
 
+law natural_mul_commutative:
+  for a: Nat
+  for b: Nat
+  {Nat.mul(a, b) == Nat.mul(b, a) : Nat}
+
+law natural_mul_associative:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  {Nat.mul(Nat.mul(a, b), c) == Nat.mul(a, Nat.mul(b, c)) : Nat}
+
+law natural_mul_add_right:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  {Nat.mul(a, Nat.add(b, c)) == Nat.add(Nat.mul(a, b), Nat.mul(a, c)) : Nat}
+
 law integer_neg_involutive:
   for x: Z.Integer
   {Z.Integer.neg(Z.Integer.neg(x)) == x : Z.Integer}
