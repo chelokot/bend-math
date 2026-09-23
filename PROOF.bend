@@ -116,6 +116,9 @@ def Laws.integer_one_mul(x):
 def Laws.integer_add_neg_self(x):
   Z.Integer.add_neg_self(x)
 
+def Laws.integer_subtract_spec(a, b):
+  Z.Integer.subtract_spec(a, b)
+
 def Laws.integer_le_reflexive(x):
   Z.Integer.le_reflexive(x)
 
@@ -172,6 +175,9 @@ def Laws.rational_mul_add_distributive(a, b, c):
 
 def Laws.rational_add_mul_distributive(a, b, c):
   Q.Rational.add_mul_distributive(a, b, c)
+
+def Laws.rational_inverse_cancel(x, nonzero):
+  Q.Rational.inverse_cancel(x, nonzero)
 
 def Laws.rational_le_antisymmetric(x, y, xy, yx):
   Q.Rational.le_antisymmetric(x, y, xy, yx)

@@ -33,8 +33,9 @@ The next proof boundaries are:
    `Rational`. Rational equality and order are transitive, addition and
    multiplication are associative and commutative, and addition respects
    cross-multiplication equality. Multiplication also respects equality, and
-   both distributive laws are proved. Inverses and the multiplicative order
-   laws remain open.
+   both distributive laws are proved. A nonzero rational has a checked
+   multiplicative inverse. Compatibility of inversion with equivalent
+   representations and the multiplicative order laws remain open.
 2. Prove `Real.Eq` transitive and lift addition, multiplication, order and
    limits to Cauchy representations, with all operations respecting `Real.Eq`.
 3. Prove completeness and construct square roots with their defining laws.

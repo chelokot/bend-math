@@ -36,6 +36,31 @@ def Integer.subtract_naturals(a: Nat, b: Nat) -> Integer:
     case 1n+ap 1n+bp:
       Integer.subtract_naturals(ap, bp)
 
+def Integer.SubtractSpec(+a: Nat, +b: Nat, result: Integer) -> Type:
+  match result:
+    case ZPos{magnitude}:
+      {a == Nat.add(b, magnitude) : Nat}
+    case ZNeg{predecessor}:
+      {b == Nat.add(a, 1n+predecessor) : Nat}
+
+def Integer.subtract_spec_successor(+a: Nat, +b: Nat, result: Integer, proof: Integer.SubtractSpec(a, b, result)) -> Integer.SubtractSpec(1n+a, 1n+b, result):
+  match result:
+    case ZPos{magnitude}:
+      Equal.cong(Nat, Nat, z => 1n+z, a, Nat.add(b, magnitude), proof)
+    case ZNeg{predecessor}:
+      Equal.cong(Nat, Nat, z => 1n+z, b, Nat.add(a, 1n+predecessor), proof)
+
+def Integer.subtract_spec(a: Nat, b: Nat) -> Integer.SubtractSpec(a, b, Integer.subtract_naturals(a, b)):
+  match a b:
+    case 0n 0n:
+      {==}
+    case 0n 1n+bp:
+      {==}
+    case 1n+ap 0n:
+      {==}
+    case 1n++ap 1n++bp:
+      Integer.subtract_spec_successor(ap, bp, Integer.subtract_naturals(ap, bp), Integer.subtract_spec(ap, bp))
+
 def Integer.subtract_same(n: Nat) -> {Integer.subtract_naturals(n, n) == Integer.zero() : Integer}:
   match n:
     case 0n:

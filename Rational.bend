@@ -249,6 +249,64 @@ def Rational.scale(x: Rational, +factor_predecessor: Nat) -> Rational:
         Rational.denominator_product(denominator_predecessor, factor_predecessor)
       }
 
+def Rational.inverse_from_difference(denominator_predecessor: Nat, difference: Z.Integer) -> Rational:
+  match difference:
+    case Z.ZPos{magnitude}:
+      match magnitude:
+        case 0n:
+          Rational.zero()
+        case 1n+predecessor:
+          Fraction{1n+denominator_predecessor, 0n, predecessor}
+    case Z.ZNeg{predecessor}:
+      Fraction{0n, 1n+denominator_predecessor, predecessor}
+
+def Rational.inverse(x: Rational) -> Rational:
+  match x:
+    case Fraction{positive, negative, denominator_predecessor}:
+      Rational.inverse_from_difference(denominator_predecessor, Z.Integer.subtract_naturals(positive, negative))
+
+def Rational.mul_neg_right(a: Rational, b: Rational) -> {Rational.mul(a, Rational.neg(b)) == Rational.neg(Rational.mul(a, b)) : Rational}:
+  match a b:
+    case Fraction{ap, an, ad} Fraction{bp, bn, bd}:
+      {==}
+
+def Rational.mul_pure_positive_shape(+p: Nat, +n: Nat, +d: Nat, +k: Nat) ->
+  {Rational.mul(Fraction{p, n, d}, Fraction{1n+d, 0n, k}) ==
+   Fraction{Nat.mul(p, 1n+d), Nat.mul(n, 1n+d), Rational.denominator_product(d, k)} : Rational}:
+  +denominator: Nat = 1n+d
+  Rational.fraction_congruent(
+    Nat.add(Nat.mul(p, denominator), Nat.mul(n, 0n)),
+    Nat.add(Nat.mul(p, 0n), Nat.mul(n, denominator)),
+    Rational.denominator_product(d, k),
+    Nat.mul(p, denominator), Nat.mul(n, denominator), Rational.denominator_product(d, k),
+    Equal.trans(Nat,
+      Nat.add(Nat.mul(p, denominator), Nat.mul(n, 0n)),
+      Nat.add(Nat.mul(p, denominator), 0n),
+      Nat.mul(p, denominator),
+      N.Natural.eq_add_congruent(
+        Nat.mul(p, denominator), Nat.mul(n, 0n), Nat.mul(p, denominator), 0n,
+        {==}, N.Natural.mul_zero(n)),
+      N.Natural.add_zero(Nat.mul(p, denominator))),
+    N.Natural.eq_add_congruent(
+      Nat.mul(p, 0n), Nat.mul(n, denominator), 0n, Nat.mul(n, denominator),
+      N.Natural.mul_zero(p), {==}),
+    {==})
+
+def Rational.mul_pure_negative_shape(+p: Nat, +n: Nat, +d: Nat, +k: Nat) ->
+  {Rational.mul(Fraction{p, n, d}, Fraction{0n, 1n+d, k}) ==
+   Fraction{Nat.mul(n, 1n+d), Nat.mul(p, 1n+d), Rational.denominator_product(d, k)} : Rational}:
+  +x: Rational = Fraction{p, n, d}
+  +positive_inverse: Rational = Fraction{1n+d, 0n, k}
+  +positive_product: Rational = Fraction{Nat.mul(p, 1n+d), Nat.mul(n, 1n+d), Rational.denominator_product(d, k)}
+  Equal.trans(Rational,
+    Rational.mul(x, Rational.neg(positive_inverse)),
+    Rational.neg(Rational.mul(x, positive_inverse)),
+    Rational.neg(positive_product),
+    Rational.mul_neg_right(x, positive_inverse),
+    Equal.cong(Rational, Rational, Rational.neg,
+      Rational.mul(x, positive_inverse), positive_product,
+      Rational.mul_pure_positive_shape(p, n, d, k)))
+
 def Rational.mul_commutative(a: Rational, b: Rational) -> {Rational.mul(a, b) == Rational.mul(b, a) : Rational}:
   match a b:
     case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd}:
@@ -334,6 +392,44 @@ def Rational.Eq(+x: Rational, +y: Rational) -> Type:
 def Rational.eq_from_structural(+a: Rational, +b: Rational, proof: {a == b : Rational}) -> Rational.Eq(a, b):
   %proof : Rational.Eq(a, _)
   {==}
+
+def Rational.eq_one_of_positive_gap(+p: Nat, +n: Nat, +d: Nat, +k: Nat,
+  proof: {p == Nat.add(n, 1n+k) : Nat}) ->
+  Rational.Eq(
+    Fraction{Nat.mul(p, 1n+d), Nat.mul(n, 1n+d), Rational.denominator_product(d, k)},
+    Rational.one()):
+  +denominator: Nat = 1n+d
+  +gap: Nat = 1n+k
+  +product_denominator: Nat = 1n+Rational.denominator_product(d, k)
+  +positive_product: Nat = Nat.mul(p, denominator)
+  +negative_product: Nat = Nat.mul(n, denominator)
+  +left: Nat = Nat.add(Nat.mul(positive_product, 1n), 0n)
+  +right: Nat = Nat.add(Nat.mul(1n, product_denominator), Nat.mul(negative_product, 1n))
+  +balanced: Nat = Nat.add(Nat.mul(denominator, gap), negative_product)
+  +denominator_sum: Nat = Nat.add(product_denominator, negative_product)
+  Equal.trans(Nat,
+    left, positive_product, right,
+    Equal.trans(Nat,
+      left, Nat.mul(positive_product, 1n), positive_product,
+      N.Natural.add_zero(Nat.mul(positive_product, 1n)),
+      N.Natural.mul_one(positive_product)),
+    Equal.trans(Nat,
+      positive_product, balanced, right,
+      N.Natural.mul_gap_one(p, n, denominator, gap, proof),
+      Equal.trans(Nat,
+        balanced, denominator_sum, right,
+        N.Natural.eq_add_congruent(
+          Nat.mul(denominator, gap), negative_product,
+          product_denominator, negative_product,
+          Equal.sym(Nat, product_denominator, Nat.mul(denominator, gap),
+            Rational.denominator_product_spec(d, k)),
+          {==}),
+        Equal.sym(Nat, right, denominator_sum,
+          N.Natural.eq_add_congruent(
+            Nat.mul(1n, product_denominator), Nat.mul(negative_product, 1n),
+            product_denominator, negative_product,
+            N.Natural.one_mul(product_denominator),
+            N.Natural.mul_one(negative_product))))))
 
 def Rational.scale_preserves_eq(x: Rational, +factor_predecessor: Nat) -> Rational.Eq(x, Rational.scale(x, factor_predecessor)):
   match x:
@@ -818,6 +914,51 @@ def Rational.eq_mul_both(+x: Rational, +x_replacement: Rational, +y: Rational, +
     Rational.mul(x, y), Rational.mul(x_replacement, y), Rational.mul(x_replacement, y_replacement),
     Rational.eq_mul_right(x, x_replacement, y, x_equal),
     Rational.eq_mul_left(y, y_replacement, x_replacement, y_equal))
+
+def Rational.inverse_positive_cancel(+p: Nat, +n: Nat, +d: Nat, +k: Nat,
+  proof: {p == Nat.add(n, 1n+k) : Nat}) ->
+  Rational.Eq(Rational.mul(Fraction{p, n, d}, Fraction{1n+d, 0n, k}), Rational.one()):
+  +product: Rational = Rational.mul(Fraction{p, n, d}, Fraction{1n+d, 0n, k})
+  +simplified: Rational = Fraction{Nat.mul(p, 1n+d), Nat.mul(n, 1n+d), Rational.denominator_product(d, k)}
+  Rational.eq_structural_congruent(simplified, Rational.one(), product, Rational.one(),
+    Rational.eq_one_of_positive_gap(p, n, d, k, proof),
+    Equal.sym(Rational, product, simplified, Rational.mul_pure_positive_shape(p, n, d, k)),
+    {==})
+
+def Rational.inverse_negative_cancel(+p: Nat, +n: Nat, +d: Nat, +k: Nat,
+  proof: {n == Nat.add(p, 1n+k) : Nat}) ->
+  Rational.Eq(Rational.mul(Fraction{p, n, d}, Fraction{0n, 1n+d, k}), Rational.one()):
+  +product: Rational = Rational.mul(Fraction{p, n, d}, Fraction{0n, 1n+d, k})
+  +simplified: Rational = Fraction{Nat.mul(n, 1n+d), Nat.mul(p, 1n+d), Rational.denominator_product(d, k)}
+  Rational.eq_structural_congruent(simplified, Rational.one(), product, Rational.one(),
+    Rational.eq_one_of_positive_gap(n, p, d, k, proof),
+    Equal.sym(Rational, product, simplified, Rational.mul_pure_negative_shape(p, n, d, k)),
+    {==})
+
+def Rational.inverse_cancel_by_difference(+p: Nat, +n: Nat, +d: Nat, difference: Z.Integer,
+  specification: Z.Integer.SubtractSpec(p, n, difference),
+  nonzero: Rational.Eq(Fraction{p, n, d}, Rational.zero()) -> Empty) ->
+  Rational.Eq(Rational.mul(Fraction{p, n, d}, Rational.inverse_from_difference(d, difference)), Rational.one()):
+  match difference:
+    case Z.ZPos{magnitude}:
+      match magnitude:
+        case 0n:
+          Empty.absurd(Rational.Eq(Rational.mul(Fraction{p, n, d}, Rational.zero()), Rational.one()),
+            nonzero(Rational.eq_zero_if_balanced(p, n, d,
+              Equal.trans(Nat,
+                p, Nat.add(n, 0n), n,
+                specification, N.Natural.add_zero(n)))))
+        case 1n+k:
+          Rational.inverse_positive_cancel(p, n, d, k, specification)
+    case Z.ZNeg{predecessor}:
+      Rational.inverse_negative_cancel(p, n, d, predecessor, specification)
+
+def Rational.inverse_cancel(x: Rational, nonzero: Rational.Eq(x, Rational.zero()) -> Empty) -> Rational.Eq(Rational.mul(x, Rational.inverse(x)), Rational.one()):
+  match x:
+    case Fraction{+p, +n, +d}:
+      Rational.inverse_cancel_by_difference(p, n, d,
+        Z.Integer.subtract_naturals(p, n),
+        Z.Integer.subtract_spec(p, n), nonzero)
 
 def Rational.mul_add_distributive(+a: Rational, +b: Rational, +c: Rational) ->
   Rational.Eq(Rational.mul(a, Rational.add(b, c)), Rational.add(Rational.mul(a, b), Rational.mul(a, c))):

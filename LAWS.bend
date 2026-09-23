@@ -213,6 +213,11 @@ law integer_add_neg_self:
   for x: Z.Integer
   {Z.Integer.add(x, Z.Integer.neg(x)) == Z.Integer.zero() : Z.Integer}
 
+law integer_subtract_spec:
+  for a: Nat
+  for b: Nat
+  Z.Integer.SubtractSpec(a, b, Z.Integer.subtract_naturals(a, b))
+
 law integer_le_reflexive:
   for x: Z.Integer
   Z.Integer.Le(x, x)
@@ -331,6 +336,11 @@ law rational_add_mul_distributive:
   for b: Q.Rational
   for c: Q.Rational
   Q.Rational.Eq(Q.Rational.mul(Q.Rational.add(a, b), c), Q.Rational.add(Q.Rational.mul(a, c), Q.Rational.mul(b, c)))
+
+law rational_inverse_cancel:
+  for x: Q.Rational
+  for nonzero: Q.Rational.Eq(x, Q.Rational.zero()) -> Empty
+  Q.Rational.Eq(Q.Rational.mul(x, Q.Rational.inverse(x)), Q.Rational.one())
 
 law rational_le_antisymmetric:
   for x: Q.Rational

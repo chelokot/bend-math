@@ -37,3 +37,15 @@ law negative_one_is_less_than_zero:
 
 def negative_one_is_less_than_zero():
   Unit{}
+
+law inverse_of_half:
+  Q.Rational.Eq(Q.Rational.inverse(Q.Fraction{1n, 0n, 1n}), Q.Rational.of_nat(2n))
+
+def inverse_of_half():
+  {==}
+
+law inverse_of_negative_half:
+  Q.Rational.Eq(Q.Rational.inverse(Q.Fraction{0n, 1n, 1n}), Q.Fraction{0n, 2n, 0n})
+
+def inverse_of_negative_half():
+  {==}

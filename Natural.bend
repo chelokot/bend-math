@@ -892,6 +892,25 @@ def Natural.matrix_distributive_scaled(+a: Nat, +b: Nat, +c: Nat, +d: Nat, +e: N
         Equal.sym(Nat, Nat.mul(first, Nat.mul(h, k)), Nat.mul(Nat.mul(first, k), h), Natural.mul_inner_swap(first, h, k)),
         Equal.sym(Nat, Nat.mul(second, Nat.mul(h, j)), Nat.mul(Nat.mul(second, j), h), Natural.mul_inner_swap(second, h, j)))))
 
+def Natural.mul_gap_one(+p: Nat, +n: Nat, +d: Nat, +gap: Nat, proof: {p == Nat.add(n, gap) : Nat}) ->
+  {Nat.mul(p, d) == Nat.add(Nat.mul(d, gap), Nat.mul(n, d)) : Nat}:
+  Equal.trans(Nat,
+    Nat.mul(p, d), Nat.mul(Nat.add(n, gap), d), Nat.add(Nat.mul(d, gap), Nat.mul(n, d)),
+    Equal.cong(Nat, Nat, z => Nat.mul(z, d), p, Nat.add(n, gap), proof),
+    Equal.trans(Nat,
+      Nat.mul(Nat.add(n, gap), d),
+      Nat.add(Nat.mul(n, d), Nat.mul(gap, d)),
+      Nat.add(Nat.mul(d, gap), Nat.mul(n, d)),
+      Natural.mul_add_left(n, gap, d),
+      Equal.trans(Nat,
+        Nat.add(Nat.mul(n, d), Nat.mul(gap, d)),
+        Nat.add(Nat.mul(n, d), Nat.mul(d, gap)),
+        Nat.add(Nat.mul(d, gap), Nat.mul(n, d)),
+        Natural.eq_add_congruent(
+          Nat.mul(n, d), Nat.mul(gap, d), Nat.mul(n, d), Nat.mul(d, gap),
+          {==}, Natural.mul_commutative(gap, d)),
+        Natural.add_commutative(Nat.mul(n, d), Nat.mul(d, gap)))))
+
 def Natural.le_mul_right_cancel_positive(+k: Nat, a: Nat, b: Nat, proof: Natural.Le(Nat.mul(a, 1n+k), Nat.mul(b, 1n+k))) -> Natural.Le(a, b):
   match a b:
     case 0n 0n:
