@@ -483,6 +483,93 @@ def Rational.le_replace(+x: Rational, +x_replacement: Rational, +y: Rational, +y
     Rational.eq_both_le(x, x_replacement, x_equal),
     Rational.eq_both_le(y, y_replacement, y_equal), xy)
 
+def Rational.le_add_right_core(
+  +xp: Nat, +xn: Nat, +xd: Nat,
+  +yp: Nat, +yn: Nat, +yd: Nat,
+  +zp: Nat, +zn: Nat, +zd: Nat,
+  xy: N.Natural.Le(
+    Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd)),
+    Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd)))) ->
+  Rational.Le(
+    Rational.add(Fraction{xp, xn, xd}, Fraction{zp, zn, zd}),
+    Rational.add(Fraction{yp, yn, yd}, Fraction{zp, zn, zd})):
+  +dx: Nat = 1n+xd
+  +dy: Nat = 1n+yd
+  +dz: Nat = 1n+zd
+  +dxz: Nat = 1n+Rational.denominator_product(xd, zd)
+  +dyz: Nat = 1n+Rational.denominator_product(yd, zd)
+  +pxz: Nat = Nat.add(Nat.mul(xp, dz), Nat.mul(zp, dx))
+  +nxz: Nat = Nat.add(Nat.mul(xn, dz), Nat.mul(zn, dx))
+  +pyz: Nat = Nat.add(Nat.mul(yp, dz), Nat.mul(zp, dy))
+  +nyz: Nat = Nat.add(Nat.mul(yn, dz), Nat.mul(zn, dy))
+  +ideal_left: Nat = Nat.add(Nat.mul(pxz, Nat.mul(dy, dz)), Nat.mul(nyz, Nat.mul(dx, dz)))
+  +ideal_right: Nat = Nat.add(Nat.mul(pyz, Nat.mul(dx, dz)), Nat.mul(nxz, Nat.mul(dy, dz)))
+  +actual_left: Nat = Nat.add(Nat.mul(pxz, dyz), Nat.mul(nyz, dxz))
+  +actual_right: Nat = Nat.add(Nat.mul(pyz, dxz), Nat.mul(nxz, dyz))
+  N.Natural.le_congruent(ideal_left, ideal_right, actual_left, actual_right,
+    N.Natural.cross_shift_monotone(xp, yn, dx, dy, yp, xn, zp, zn, dz, xy),
+    N.Natural.eq_add_congruent(
+      Nat.mul(pxz, Nat.mul(dy, dz)), Nat.mul(nyz, Nat.mul(dx, dz)),
+      Nat.mul(pxz, dyz), Nat.mul(nyz, dxz),
+      Equal.cong(Nat, Nat, z => Nat.mul(pxz, z), Nat.mul(dy, dz), dyz,
+        Equal.sym(Nat, dyz, Nat.mul(dy, dz), Rational.denominator_product_spec(yd, zd))),
+      Equal.cong(Nat, Nat, z => Nat.mul(nyz, z), Nat.mul(dx, dz), dxz,
+        Equal.sym(Nat, dxz, Nat.mul(dx, dz), Rational.denominator_product_spec(xd, zd)))),
+    N.Natural.eq_add_congruent(
+      Nat.mul(pyz, Nat.mul(dx, dz)), Nat.mul(nxz, Nat.mul(dy, dz)),
+      Nat.mul(pyz, dxz), Nat.mul(nxz, dyz),
+      Equal.cong(Nat, Nat, z => Nat.mul(pyz, z), Nat.mul(dx, dz), dxz,
+        Equal.sym(Nat, dxz, Nat.mul(dx, dz), Rational.denominator_product_spec(xd, zd))),
+      Equal.cong(Nat, Nat, z => Nat.mul(nxz, z), Nat.mul(dy, dz), dyz,
+        Equal.sym(Nat, dyz, Nat.mul(dy, dz), Rational.denominator_product_spec(yd, zd)))))
+
+def Rational.le_add_right(+x: Rational, +y: Rational, +z: Rational, xy: Rational.Le(x, y)) -> Rational.Le(Rational.add(x, z), Rational.add(y, z)):
+  match x y z:
+    case Fraction{xp, xn, xd} Fraction{yp, yn, yd} Fraction{zp, zn, zd}:
+      Rational.le_add_right_core(xp, xn, xd, yp, yn, yd, zp, zn, zd, xy)
+
+def Rational.le_structural_congruent(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  proof: Rational.Le(a, b), ac: {a == c : Rational}, bd: {b == d : Rational}) -> Rational.Le(c, d):
+  %ac : Rational.Le(_, d)
+  %bd : Rational.Le(a, _)
+  proof
+
+def Rational.le_add_left(+x: Rational, +y: Rational, +z: Rational, xy: Rational.Le(x, y)) -> Rational.Le(Rational.add(z, x), Rational.add(z, y)):
+  Rational.le_structural_congruent(
+    Rational.add(x, z), Rational.add(y, z), Rational.add(z, x), Rational.add(z, y),
+    Rational.le_add_right(x, y, z, xy),
+    Rational.add_commutative(x, z), Rational.add_commutative(y, z))
+
+def Rational.eq_add_right_bounds(+x: Rational, +y: Rational, +z: Rational,
+  bounds: Rational.Le(x, y) & Rational.Le(y, x)) -> Rational.Eq(Rational.add(x, z), Rational.add(y, z)):
+  (forward, backward) = bounds
+  Rational.le_antisymmetric(Rational.add(x, z), Rational.add(y, z),
+    Rational.le_add_right(x, y, z, forward),
+    Rational.le_add_right(y, x, z, backward))
+
+def Rational.eq_add_right(+x: Rational, +y: Rational, +z: Rational, equality: Rational.Eq(x, y)) -> Rational.Eq(Rational.add(x, z), Rational.add(y, z)):
+  Rational.eq_add_right_bounds(x, y, z, Rational.eq_both_le(x, y, equality))
+
+def Rational.eq_structural_congruent(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  proof: Rational.Eq(a, b), ac: {a == c : Rational}, bd: {b == d : Rational}) -> Rational.Eq(c, d):
+  %ac : Rational.Eq(_, d)
+  %bd : Rational.Eq(a, _)
+  proof
+
+def Rational.eq_add_left(+x: Rational, +y: Rational, +z: Rational, equality: Rational.Eq(x, y)) -> Rational.Eq(Rational.add(z, x), Rational.add(z, y)):
+  Rational.eq_structural_congruent(
+    Rational.add(x, z), Rational.add(y, z), Rational.add(z, x), Rational.add(z, y),
+    Rational.eq_add_right(x, y, z, equality),
+    Rational.add_commutative(x, z), Rational.add_commutative(y, z))
+
+def Rational.eq_add_both(+x: Rational, +x_replacement: Rational, +y: Rational, +y_replacement: Rational,
+  x_equal: Rational.Eq(x, x_replacement), y_equal: Rational.Eq(y, y_replacement)) ->
+  Rational.Eq(Rational.add(x, y), Rational.add(x_replacement, y_replacement)):
+  Rational.eq_transitive(
+    Rational.add(x, y), Rational.add(x_replacement, y), Rational.add(x_replacement, y_replacement),
+    Rational.eq_add_right(x, x_replacement, y, x_equal),
+    Rational.eq_add_left(y, y_replacement, x_replacement, y_equal))
+
 def Rational.two_power_predecessor(n: Nat) -> Nat:
   match n:
     case 0n:

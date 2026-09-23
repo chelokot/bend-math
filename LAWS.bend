@@ -290,6 +290,22 @@ law rational_le_respects_equality:
   for xy: Q.Rational.Le(x, y)
   Q.Rational.Le(x_replacement, y_replacement)
 
+law rational_le_add_right:
+  for x: Q.Rational
+  for y: Q.Rational
+  for z: Q.Rational
+  for xy: Q.Rational.Le(x, y)
+  Q.Rational.Le(Q.Rational.add(x, z), Q.Rational.add(y, z))
+
+law rational_add_respects_equality:
+  for x: Q.Rational
+  for x_replacement: Q.Rational
+  for y: Q.Rational
+  for y_replacement: Q.Rational
+  for x_equal: Q.Rational.Eq(x, x_replacement)
+  for y_equal: Q.Rational.Eq(y, y_replacement)
+  Q.Rational.Eq(Q.Rational.add(x, y), Q.Rational.add(x_replacement, y_replacement))
+
 law rational_le_antisymmetric:
   for x: Q.Rational
   for y: Q.Rational

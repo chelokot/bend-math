@@ -360,6 +360,49 @@ def Natural.mul_last_swap(+a: Nat, +b: Nat, +c: Nat) -> {Nat.mul(Nat.mul(a, b), 
         Nat.mul(a, Nat.mul(c, b)),
         Natural.mul_associative(a, c, b))))
 
+def Natural.mul_swap(+a: Nat, +b: Nat, +c: Nat) -> {Nat.mul(a, Nat.mul(b, c)) == Nat.mul(b, Nat.mul(a, c)) : Nat}:
+  Equal.trans(Nat,
+    Nat.mul(a, Nat.mul(b, c)),
+    Nat.mul(Nat.mul(a, b), c),
+    Nat.mul(b, Nat.mul(a, c)),
+    Equal.sym(Nat,
+      Nat.mul(Nat.mul(a, b), c), Nat.mul(a, Nat.mul(b, c)),
+      Natural.mul_associative(a, b, c)),
+    Equal.trans(Nat,
+      Nat.mul(Nat.mul(a, b), c),
+      Nat.mul(Nat.mul(b, a), c),
+      Nat.mul(b, Nat.mul(a, c)),
+      Equal.cong(Nat, Nat, z => Nat.mul(z, c), Nat.mul(a, b), Nat.mul(b, a), Natural.mul_commutative(a, b)),
+      Natural.mul_associative(b, a, c)))
+
+def Natural.mul_four_middle_commute(+a: Nat, +b: Nat, +c: Nat, +d: Nat) ->
+  {Nat.mul(Nat.mul(a, b), Nat.mul(c, d)) == Nat.mul(Nat.mul(a, c), Nat.mul(b, d)) : Nat}:
+  Equal.trans(Nat,
+    Nat.mul(Nat.mul(a, b), Nat.mul(c, d)),
+    Nat.mul(a, Nat.mul(b, Nat.mul(c, d))),
+    Nat.mul(Nat.mul(a, c), Nat.mul(b, d)),
+    Natural.mul_associative(a, b, Nat.mul(c, d)),
+    Equal.trans(Nat,
+      Nat.mul(a, Nat.mul(b, Nat.mul(c, d))),
+      Nat.mul(a, Nat.mul(c, Nat.mul(b, d))),
+      Nat.mul(Nat.mul(a, c), Nat.mul(b, d)),
+      Equal.cong(Nat, Nat, z => Nat.mul(a, z), Nat.mul(b, Nat.mul(c, d)), Nat.mul(c, Nat.mul(b, d)), Natural.mul_swap(b, c, d)),
+      Equal.sym(Nat,
+        Nat.mul(Nat.mul(a, c), Nat.mul(b, d)),
+        Nat.mul(a, Nat.mul(c, Nat.mul(b, d))),
+        Natural.mul_associative(a, c, Nat.mul(b, d)))))
+
+def Natural.mul_four_group(+a: Nat, +b: Nat, +c: Nat, +d: Nat) ->
+  {Nat.mul(Nat.mul(a, b), Nat.mul(c, d)) == Nat.mul(a, Nat.mul(Nat.mul(b, c), d)) : Nat}:
+  Equal.trans(Nat,
+    Nat.mul(Nat.mul(a, b), Nat.mul(c, d)),
+    Nat.mul(a, Nat.mul(b, Nat.mul(c, d))),
+    Nat.mul(a, Nat.mul(Nat.mul(b, c), d)),
+    Natural.mul_associative(a, b, Nat.mul(c, d)),
+    Equal.cong(Nat, Nat, z => Nat.mul(a, z),
+      Nat.mul(b, Nat.mul(c, d)), Nat.mul(Nat.mul(b, c), d),
+      Equal.sym(Nat, Nat.mul(Nat.mul(b, c), d), Nat.mul(b, Nat.mul(c, d)), Natural.mul_associative(b, c, d))))
+
 def Natural.fraction_sum_associative(+a: Nat, +b: Nat, +c: Nat, +d: Nat, +e: Nat, +f: Nat) ->
   {Nat.add(Nat.mul(Nat.add(Nat.mul(a, e), Nat.mul(b, d)), f), Nat.mul(c, Nat.mul(d, e))) ==
    Nat.add(Nat.mul(a, Nat.mul(e, f)), Nat.mul(Nat.add(Nat.mul(b, f), Nat.mul(c, e)), d)) : Nat}:
@@ -518,6 +561,113 @@ def Natural.signed_product_associative(+a: Nat, +b: Nat, +c: Nat, +d: Nat, +e: N
               Nat.mul(b, Nat.add(Nat.mul(c, f), Nat.mul(d, e))),
               Nat.add(Nat.mul(b, Nat.mul(c, f)), Nat.mul(b, Nat.mul(d, e))),
               Natural.mul_add_right(b, Nat.mul(c, f), Nat.mul(d, e))))))))
+
+def Natural.cross_shift_expansion(+a: Nat, +c: Nat, +b: Nat, +d: Nat, +u: Nat, +v: Nat, +k: Nat) ->
+  {Nat.add(
+     Nat.mul(Nat.add(Nat.mul(a, k), Nat.mul(u, b)), Nat.mul(d, k)),
+     Nat.mul(Nat.add(Nat.mul(c, k), Nat.mul(v, d)), Nat.mul(b, k))) ==
+   Nat.add(
+     Nat.mul(Nat.add(Nat.mul(a, d), Nat.mul(c, b)), Nat.mul(k, k)),
+     Nat.mul(Nat.add(u, v), Nat.mul(Nat.mul(b, d), k))) : Nat}:
+  +ak: Nat = Nat.mul(a, k)
+  +ck: Nat = Nat.mul(c, k)
+  +ub: Nat = Nat.mul(u, b)
+  +vd: Nat = Nat.mul(v, d)
+  +dk: Nat = Nat.mul(d, k)
+  +bk: Nat = Nat.mul(b, k)
+  +kk: Nat = Nat.mul(k, k)
+  +common: Nat = Nat.mul(Nat.mul(b, d), k)
+  +t1: Nat = Nat.mul(ak, dk)
+  +t2: Nat = Nat.mul(ub, dk)
+  +t3: Nat = Nat.mul(ck, bk)
+  +t4: Nat = Nat.mul(vd, bk)
+  +n1: Nat = Nat.mul(Nat.mul(a, d), kk)
+  +n2: Nat = Nat.mul(u, common)
+  +n3: Nat = Nat.mul(Nat.mul(c, b), kk)
+  +n4: Nat = Nat.mul(v, common)
+  +left: Nat = Nat.add(Nat.mul(Nat.add(ak, ub), dk), Nat.mul(Nat.add(ck, vd), bk))
+  +expanded: Nat = Nat.add(Nat.add(t1, t2), Nat.add(t3, t4))
+  +grouped: Nat = Nat.add(Nat.add(t1, t3), Nat.add(t2, t4))
+  +normalized: Nat = Nat.add(Nat.add(n1, n3), Nat.add(n2, n4))
+  +right: Nat = Nat.add(Nat.mul(Nat.add(Nat.mul(a, d), Nat.mul(c, b)), kk), Nat.mul(Nat.add(u, v), common))
+  Equal.trans(Nat,
+    left, expanded, right,
+    Natural.eq_add_congruent(
+      Nat.mul(Nat.add(ak, ub), dk), Nat.mul(Nat.add(ck, vd), bk),
+      Nat.add(t1, t2), Nat.add(t3, t4),
+      Natural.mul_add_left(ak, ub, dk), Natural.mul_add_left(ck, vd, bk)),
+    Equal.trans(Nat,
+      expanded, grouped, right,
+      Natural.add_middle_commute(t1, t2, t3, t4),
+      Equal.trans(Nat,
+        grouped, normalized, right,
+        Natural.eq_add_congruent(
+          Nat.add(t1, t3), Nat.add(t2, t4),
+          Nat.add(n1, n3), Nat.add(n2, n4),
+          Natural.eq_add_congruent(t1, t3, n1, n3,
+            Natural.mul_four_middle_commute(a, k, d, k),
+            Natural.mul_four_middle_commute(c, k, b, k)),
+          Natural.eq_add_congruent(t2, t4, n2, n4,
+            Natural.mul_four_group(u, b, d, k),
+            Equal.trans(Nat,
+              t4, Nat.mul(Nat.mul(v, b), dk), n4,
+              Natural.mul_four_middle_commute(v, d, b, k),
+              Natural.mul_four_group(v, b, d, k)))),
+        Natural.eq_add_congruent(
+          Nat.add(n1, n3), Nat.add(n2, n4),
+          Nat.mul(Nat.add(Nat.mul(a, d), Nat.mul(c, b)), kk),
+          Nat.mul(Nat.add(u, v), common),
+          Equal.sym(Nat,
+            Nat.mul(Nat.add(Nat.mul(a, d), Nat.mul(c, b)), kk),
+            Nat.add(n1, n3),
+            Natural.mul_add_left(Nat.mul(a, d), Nat.mul(c, b), kk)),
+          Equal.sym(Nat,
+            Nat.mul(Nat.add(u, v), common), Nat.add(n2, n4),
+            Natural.mul_add_left(u, v, common))))))
+
+def Natural.cross_shift_monotone(+a: Nat, +c: Nat, +b: Nat, +d: Nat,
+  +e: Nat, +f: Nat, +u: Nat, +v: Nat, +k: Nat,
+  proof: Natural.Le(Nat.add(Nat.mul(a, d), Nat.mul(c, b)), Nat.add(Nat.mul(e, b), Nat.mul(f, d)))) ->
+  Natural.Le(
+    Nat.add(Nat.mul(Nat.add(Nat.mul(a, k), Nat.mul(u, b)), Nat.mul(d, k)),
+      Nat.mul(Nat.add(Nat.mul(c, k), Nat.mul(v, d)), Nat.mul(b, k))),
+    Nat.add(Nat.mul(Nat.add(Nat.mul(e, k), Nat.mul(u, d)), Nat.mul(b, k)),
+      Nat.mul(Nat.add(Nat.mul(f, k), Nat.mul(v, b)), Nat.mul(d, k)))):
+  +left_base: Nat = Nat.add(Nat.mul(a, d), Nat.mul(c, b))
+  +right_base: Nat = Nat.add(Nat.mul(e, b), Nat.mul(f, d))
+  +square: Nat = Nat.mul(k, k)
+  +common_left: Nat = Nat.mul(Nat.add(u, v), Nat.mul(Nat.mul(b, d), k))
+  +common_right: Nat = Nat.mul(Nat.add(u, v), Nat.mul(Nat.mul(d, b), k))
+  +left_normalized: Nat = Nat.add(Nat.mul(left_base, square), common_left)
+  +right_normalized: Nat = Nat.add(Nat.mul(right_base, square), common_right)
+  +left_shift: Nat = Nat.add(
+    Nat.mul(Nat.add(Nat.mul(a, k), Nat.mul(u, b)), Nat.mul(d, k)),
+    Nat.mul(Nat.add(Nat.mul(c, k), Nat.mul(v, d)), Nat.mul(b, k)))
+  +right_shift: Nat = Nat.add(
+    Nat.mul(Nat.add(Nat.mul(e, k), Nat.mul(u, d)), Nat.mul(b, k)),
+    Nat.mul(Nat.add(Nat.mul(f, k), Nat.mul(v, b)), Nat.mul(d, k)))
+  Natural.le_congruent(
+    left_normalized,
+    Nat.add(Nat.mul(right_base, square), common_left),
+    left_shift, right_shift,
+    Natural.le_add_both_right(
+      Nat.mul(left_base, square), Nat.mul(right_base, square), common_left,
+      Natural.le_mul_right(left_base, right_base, square, proof)),
+    Equal.sym(Nat, left_shift, left_normalized, Natural.cross_shift_expansion(a, c, b, d, u, v, k)),
+    Equal.trans(Nat,
+      Nat.add(Nat.mul(right_base, square), common_left),
+      right_normalized,
+      right_shift,
+      Natural.eq_add_congruent(
+        Nat.mul(right_base, square), common_left,
+        Nat.mul(right_base, square), common_right,
+        {==},
+        Equal.cong(Nat, Nat,
+          z => Nat.mul(Nat.add(u, v), Nat.mul(z, k)),
+          Nat.mul(b, d), Nat.mul(d, b),
+          Natural.mul_commutative(b, d))),
+      Equal.sym(Nat, right_shift, right_normalized,
+        Natural.cross_shift_expansion(e, f, d, b, u, v, k))))
 
 def Natural.le_mul_right_cancel_positive(+k: Nat, a: Nat, b: Nat, proof: Natural.Le(Nat.mul(a, 1n+k), Nat.mul(b, 1n+k))) -> Natural.Le(a, b):
   match a b:

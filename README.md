@@ -30,8 +30,10 @@ keeps the proof obligations over exact natural-number arithmetic.
 The next proof boundaries are:
 
 1. Finish the ordered-ring laws for `Integer` and the ordered-field laws for
-   `Rational`, including compatibility of operations with cross-multiplication
-   equality. Rational equality and order are now proved transitive.
+   `Rational`. Rational equality and order are transitive, addition and
+   multiplication are associative and commutative, and addition respects
+   cross-multiplication equality. Multiplication compatibility,
+   distributivity and inverses remain open.
 2. Prove `Real.Eq` transitive and lift addition, multiplication, order and
    limits to Cauchy representations, with all operations respecting `Real.Eq`.
 3. Prove completeness and construct square roots with their defining laws.
