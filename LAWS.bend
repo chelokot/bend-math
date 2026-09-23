@@ -66,3 +66,9 @@ law real_zero_exists:
 law real_eq_reflexive:
   for x: R.Real
   R.Real.Eq(x, x)
+
+law real_eq_symmetric:
+  for x: R.Real
+  for y: R.Real
+  for proof: R.Real.Eq(x, y)
+  R.Real.Eq(y, x)

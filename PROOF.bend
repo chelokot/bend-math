@@ -46,3 +46,6 @@ def Laws.real_zero_exists():
 
 def Laws.real_eq_reflexive(x):
   R.Real.eq_reflexive(x)
+
+def Laws.real_eq_symmetric(x, y, proof):
+  R.Real.eq_symmetric(x, y, proof)

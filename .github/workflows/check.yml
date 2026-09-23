@@ -28,7 +28,7 @@ jobs:
             exit 1
           fi
           case "$output" in
-            *'Integer.Le('*'observed : Unit'*) ;;
+            *'expected : Sigma<'*'observed : Unit'*'Location: bad'*) ;;
             *) printf '%s\n' "$output"; exit 1 ;;
           esac
       - name: Reject unchecked escape hatches

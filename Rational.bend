@@ -59,6 +59,13 @@ def Rational.Eq(+x: Rational, +y: Rational) -> Type:
 def Rational.Le(+x: Rational, +y: Rational) -> Type:
   Z.Integer.Le(Rational.cross(x, y), Rational.cross(y, x))
 
+def Rational.Close(+x: Rational, +y: Rational, +left_error: Rational, +right_error: Rational) -> Type:
+  Rational.Le(x, Rational.add(y, Rational.add(left_error, right_error))) & Rational.Le(y, Rational.add(x, Rational.add(right_error, left_error)))
+
+def Rational.close_symmetric(+x: Rational, +y: Rational, +left_error: Rational, +right_error: Rational, proof: Rational.Close(x, y, left_error, right_error)) -> Rational.Close(y, x, right_error, left_error):
+  (forward, backward) = proof
+  (backward, forward)
+
 def Rational.eq_reflexive(x: Rational) -> Rational.Eq(x, x):
   {==}
 
