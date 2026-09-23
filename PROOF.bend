@@ -95,6 +95,12 @@ def Laws.rational_eq_reflexive(x):
 def Laws.rational_eq_symmetric(x, y, proof):
   Q.Rational.eq_symmetric(x, y, proof)
 
+def Laws.rational_neg_involutive(x):
+  Q.Rational.neg_involutive(x)
+
+def Laws.rational_eq_negated(x, y, proof):
+  Q.Rational.eq_negated(x, y, proof)
+
 def Laws.rational_le_reflexive(x):
   Q.Rational.le_reflexive(x)
 
@@ -103,6 +109,9 @@ def Laws.rational_le_antisymmetric(x, y, xy, yx):
 
 def Laws.rational_eq_implies_le(x, y, proof):
   Q.Rational.eq_implies_le(x, y, proof)
+
+def Laws.rational_le_negated(x, y, proof):
+  Q.Rational.le_negated(x, y, proof)
 
 def Laws.rational_denominator_product(a, b):
   Q.Rational.denominator_product_spec(a, b)

@@ -22,6 +22,11 @@ Transitivity, field operations, order, completeness, and compatibility with
 the rational quotient are still open work. The checked definitions alone do
 not license any theorem about square packing.
 
+`Rational.bend` stores a numerator as the difference of two naturals and a
+strictly positive denominator as one plus a natural. Different records can
+denote the same rational; equality and order use cross multiplication. This
+keeps the proof obligations over exact natural-number arithmetic.
+
 The next proof boundaries are:
 
 1. Finish the ordered-ring laws for `Integer` and the ordered-field laws for

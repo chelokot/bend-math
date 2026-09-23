@@ -112,6 +112,24 @@ def Natural.add_swap(+a: Nat, +b: Nat, +c: Nat) -> {Nat.add(a, Nat.add(b, c)) ==
       Equal.cong(Nat, Nat, z => Nat.add(z, c), Nat.add(a, b), Nat.add(b, a), Natural.add_commutative(a, b)),
       Natural.add_associative(b, a, c)))
 
+def Natural.eq_add_swap(+a: Nat, +b: Nat, +c: Nat, +d: Nat, proof: {Nat.add(b, a) == Nat.add(d, c) : Nat}) -> {Nat.add(a, b) == Nat.add(c, d) : Nat}:
+  Equal.trans(Nat,
+    Nat.add(a, b),
+    Nat.add(b, a),
+    Nat.add(c, d),
+    Natural.add_commutative(a, b),
+    Equal.trans(Nat,
+      Nat.add(b, a),
+      Nat.add(d, c),
+      Nat.add(c, d),
+      proof,
+      Natural.add_commutative(d, c)))
+
+def Natural.le_congruent(+a: Nat, +b: Nat, +c: Nat, +d: Nat, proof: Natural.Le(a, b), ac: {a == c : Nat}, bd: {b == d : Nat}) -> Natural.Le(c, d):
+  %ac : Natural.Le(_, d)
+  %bd : Natural.Le(a, _)
+  proof
+
 def Natural.mul_zero(n: Nat) -> {Nat.mul(n, 0n) == 0n : Nat}:
   match n:
     case 0n:

@@ -156,6 +156,16 @@ law rational_eq_symmetric:
   for proof: Q.Rational.Eq(x, y)
   Q.Rational.Eq(y, x)
 
+law rational_neg_involutive:
+  for x: Q.Rational
+  {Q.Rational.neg(Q.Rational.neg(x)) == x : Q.Rational}
+
+law rational_eq_negated:
+  for x: Q.Rational
+  for y: Q.Rational
+  for proof: Q.Rational.Eq(x, y)
+  Q.Rational.Eq(Q.Rational.neg(x), Q.Rational.neg(y))
+
 law rational_le_reflexive:
   for x: Q.Rational
   Q.Rational.Le(x, x)
@@ -172,6 +182,12 @@ law rational_eq_implies_le:
   for y: Q.Rational
   for proof: Q.Rational.Eq(x, y)
   Q.Rational.Le(x, y)
+
+law rational_le_negated:
+  for x: Q.Rational
+  for y: Q.Rational
+  for proof: Q.Rational.Le(x, y)
+  Q.Rational.Le(Q.Rational.neg(y), Q.Rational.neg(x))
 
 law rational_denominator_product:
   for a: Nat
