@@ -56,6 +56,27 @@ def Laws.integer_zero_add(x):
 def Laws.integer_add_zero(x):
   Z.Integer.add_zero(x)
 
+def Laws.integer_add_commutative(a, b):
+  Z.Integer.add_commutative(a, b)
+
+def Laws.integer_mul_commutative(a, b):
+  Z.Integer.mul_commutative(a, b)
+
+def Laws.integer_mul_zero(x):
+  Z.Integer.mul_zero(x)
+
+def Laws.integer_zero_mul(x):
+  Z.Integer.zero_mul(x)
+
+def Laws.integer_mul_one(x):
+  Z.Integer.mul_one(x)
+
+def Laws.integer_one_mul(x):
+  Z.Integer.one_mul(x)
+
+def Laws.integer_add_neg_self(x):
+  Z.Integer.add_neg_self(x)
+
 def Laws.integer_le_reflexive(x):
   Z.Integer.le_reflexive(x)
 

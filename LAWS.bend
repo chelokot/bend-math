@@ -90,6 +90,36 @@ law integer_add_zero:
   for x: Z.Integer
   {Z.Integer.add(x, Z.Integer.zero()) == x : Z.Integer}
 
+law integer_add_commutative:
+  for a: Z.Integer
+  for b: Z.Integer
+  {Z.Integer.add(a, b) == Z.Integer.add(b, a) : Z.Integer}
+
+law integer_mul_commutative:
+  for a: Z.Integer
+  for b: Z.Integer
+  {Z.Integer.mul(a, b) == Z.Integer.mul(b, a) : Z.Integer}
+
+law integer_mul_zero:
+  for x: Z.Integer
+  {Z.Integer.mul(x, Z.Integer.zero()) == Z.Integer.zero() : Z.Integer}
+
+law integer_zero_mul:
+  for x: Z.Integer
+  {Z.Integer.mul(Z.Integer.zero(), x) == Z.Integer.zero() : Z.Integer}
+
+law integer_mul_one:
+  for x: Z.Integer
+  {Z.Integer.mul(x, Z.Integer.one()) == x : Z.Integer}
+
+law integer_one_mul:
+  for x: Z.Integer
+  {Z.Integer.mul(Z.Integer.one(), x) == x : Z.Integer}
+
+law integer_add_neg_self:
+  for x: Z.Integer
+  {Z.Integer.add(x, Z.Integer.neg(x)) == Z.Integer.zero() : Z.Integer}
+
 law integer_le_reflexive:
   for x: Z.Integer
   Z.Integer.Le(x, x)
