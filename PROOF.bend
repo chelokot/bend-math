@@ -1,0 +1,42 @@
+import Base
+import ./LAWS.bend as Laws
+import ./Natural.bend as N
+import ./Integer.bend as Z
+import ./Rational.bend as Q
+import ./Real.bend as R
+
+def Laws.natural_le_reflexive(n):
+  N.Natural.le_reflexive(n)
+
+def Laws.natural_le_transitive(a, b, c, ab, bc):
+  N.Natural.le_transitive(a, b, c, ab, bc)
+
+def Laws.natural_add_zero(n):
+  N.Natural.add_zero(n)
+
+def Laws.natural_add_commutative(a, b):
+  N.Natural.add_commutative(a, b)
+
+def Laws.integer_neg_involutive(x):
+  Z.Integer.neg_involutive(x)
+
+def Laws.integer_zero_add(x):
+  Z.Integer.zero_add(x)
+
+def Laws.integer_add_zero(x):
+  Z.Integer.add_zero(x)
+
+def Laws.integer_le_reflexive(x):
+  Z.Integer.le_reflexive(x)
+
+def Laws.rational_eq_reflexive(x):
+  Q.Rational.eq_reflexive(x)
+
+def Laws.rational_eq_symmetric(x, y, proof):
+  Q.Rational.eq_symmetric(x, y, proof)
+
+def Laws.rational_le_reflexive(x):
+  Q.Rational.le_reflexive(x)
+
+def Laws.rational_denominator_product(a, b):
+  Q.Rational.denominator_product_spec(a, b)

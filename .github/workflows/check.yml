@@ -1,0 +1,29 @@
+name: Check formal proofs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: bendlang/bend
+          ref: 26659268dbdf411696bf90d28e722783dceae0f8
+          path: bend
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.22
+      - run: bun bend/bend2/main.ts PROOF.bend --check-only
+      - name: Reject unchecked escape hatches
+        run: |
+          if grep -R -nE '@unsafe|\bforeign\b|\?TODO|\baxiom\b' --include='*.bend' --exclude-dir=bend .; then
+            exit 1
+          fi
