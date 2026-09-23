@@ -62,3 +62,7 @@ law rational_denominator_product:
 
 law real_zero_exists:
   R.Real
+
+law real_eq_reflexive:
+  for x: R.Real
+  R.Real.Eq(x, x)

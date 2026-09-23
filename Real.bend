@@ -14,7 +14,12 @@ def Real.approximate(real: Real, precision: Nat) -> Q.Rational:
       approximate(precision)
 
 def Real.Eq(x: Real, y: Real) -> Type:
-  @precision: Nat -> Q.Rational.Le(Q.Rational.abs(Q.Rational.sub(Real.approximate(x, precision), Real.approximate(y, precision))), Q.Rational.add(Q.Rational.dyadic(precision), Q.Rational.dyadic(precision)))
+  @left_precision: Nat -> @right_precision: Nat -> Q.Rational.Le(Q.Rational.abs(Q.Rational.sub(Real.approximate(x, left_precision), Real.approximate(y, right_precision))), Q.Rational.add(Q.Rational.dyadic(left_precision), Q.Rational.dyadic(right_precision)))
+
+def Real.eq_reflexive(x: Real) -> Real.Eq(x, x):
+  match x:
+    case Cauchy{approximate, regular}:
+      regular
 
 def Real.zero() -> Real:
   Cauchy{precision => Q.Rational.of_nat(0n), n => m => N.Natural.zero_le(0n)}

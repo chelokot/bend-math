@@ -15,6 +15,13 @@ The final real-number model must cover arbitrary real coordinates, not just
 named computable constants. Floating-point values and unproved field axioms
 cannot substitute for that model.
 
+`Real.bend` currently represents a rational-valued regular Cauchy sequence,
+with equality defined by cross-precision bounds. Bend checks that zero is a
+valid real and that this equality is reflexive. Symmetry, transitivity, field
+operations, order, completeness, and compatibility with the rational quotient
+are still open work. The checked definitions alone do not license any theorem
+about square packing.
+
 The construction is informed by [Mathlib's Cauchy reals](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Basic/Real/Basic.html)
 and the published [`bend.how` examples](https://bend.how/lib/). Their current
 `Real` example supports a few named recipes rather than arbitrary reals. No

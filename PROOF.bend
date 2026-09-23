@@ -43,3 +43,6 @@ def Laws.rational_denominator_product(a, b):
 
 def Laws.real_zero_exists():
   R.Real.zero()
+
+def Laws.real_eq_reflexive(x):
+  R.Real.eq_reflexive(x)
