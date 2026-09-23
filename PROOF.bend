@@ -56,6 +56,12 @@ def Laws.natural_mul_associative(a, b, c):
 def Laws.natural_mul_add_right(a, b, c):
   N.Natural.mul_add_right(a, b, c)
 
+def Laws.natural_mul_right_cancel_positive(k, a, b, proof):
+  N.Natural.mul_right_cancel_positive(k, a, b, proof)
+
+def Laws.natural_mul_left_cancel_positive(k, a, b, proof):
+  N.Natural.mul_left_cancel_positive(k, a, b, proof)
+
 def Laws.integer_neg_involutive(x):
   Z.Integer.neg_involutive(x)
 

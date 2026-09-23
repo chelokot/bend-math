@@ -99,6 +99,20 @@ law natural_mul_add_right:
   for c: Nat
   {Nat.mul(a, Nat.add(b, c)) == Nat.add(Nat.mul(a, b), Nat.mul(a, c)) : Nat}
 
+law natural_mul_right_cancel_positive:
+  for k: Nat
+  for a: Nat
+  for b: Nat
+  for proof: {Nat.mul(a, 1n+k) == Nat.mul(b, 1n+k) : Nat}
+  {a == b : Nat}
+
+law natural_mul_left_cancel_positive:
+  for k: Nat
+  for a: Nat
+  for b: Nat
+  for proof: {Nat.mul(1n+k, a) == Nat.mul(1n+k, b) : Nat}
+  {a == b : Nat}
+
 law integer_neg_involutive:
   for x: Z.Integer
   {Z.Integer.neg(Z.Integer.neg(x)) == x : Z.Integer}
