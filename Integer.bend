@@ -90,6 +90,36 @@ def Integer.le_reflexive(x: Integer) -> Integer.Le(x, x):
     case ZNeg{predecessor}:
       N.Natural.le_reflexive(predecessor)
 
+def Integer.le_antisymmetric(a: Integer, b: Integer, ab: Integer.Le(a, b), ba: Integer.Le(b, a)) -> {a == b : Integer}:
+  match a b:
+    case ZPos{x} ZPos{y}:
+      Equal.cong(Nat, Integer, z => ZPos{z}, x, y, N.Natural.le_antisymmetric(x, y, ab, ba))
+    case ZPos{x} ZNeg{y}:
+      match ab:
+    case ZNeg{x} ZPos{y}:
+      match ba:
+    case ZNeg{x} ZNeg{y}:
+      Equal.cong(Nat, Integer, z => ZNeg{z}, x, y, N.Natural.le_antisymmetric(x, y, ba, ab))
+
+def Integer.le_transitive(a: Integer, b: Integer, c: Integer, ab: Integer.Le(a, b), bc: Integer.Le(b, c)) -> Integer.Le(a, c):
+  match a b c:
+    case ZPos{x} ZPos{y} ZPos{z}:
+      N.Natural.le_transitive(x, y, z, ab, bc)
+    case ZPos{x} ZPos{y} ZNeg{z}:
+      match bc:
+    case ZPos{x} ZNeg{y} ZPos{z}:
+      match ab:
+    case ZPos{x} ZNeg{y} ZNeg{z}:
+      match ab:
+    case ZNeg{x} ZPos{y} ZPos{z}:
+      Unit{}
+    case ZNeg{x} ZPos{y} ZNeg{z}:
+      match bc:
+    case ZNeg{x} ZNeg{y} ZPos{z}:
+      Unit{}
+    case ZNeg{x} ZNeg{y} ZNeg{z}:
+      N.Natural.le_transitive(z, y, x, bc, ab)
+
 def Integer.neg_involutive(x: Integer) -> {Integer.neg(Integer.neg(x)) == x : Integer}:
   match x:
     case ZPos{magnitude}:

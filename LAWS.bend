@@ -16,6 +16,13 @@ law natural_le_transitive:
   for bc: N.Natural.Le(b, c)
   N.Natural.Le(a, c)
 
+law natural_le_antisymmetric:
+  for a: Nat
+  for b: Nat
+  for ab: N.Natural.Le(a, b)
+  for ba: N.Natural.Le(b, a)
+  {a == b : Nat}
+
 law natural_le_add_right:
   for a: Nat
   for b: Nat
@@ -124,6 +131,21 @@ law integer_le_reflexive:
   for x: Z.Integer
   Z.Integer.Le(x, x)
 
+law integer_le_antisymmetric:
+  for a: Z.Integer
+  for b: Z.Integer
+  for ab: Z.Integer.Le(a, b)
+  for ba: Z.Integer.Le(b, a)
+  {a == b : Z.Integer}
+
+law integer_le_transitive:
+  for a: Z.Integer
+  for b: Z.Integer
+  for c: Z.Integer
+  for ab: Z.Integer.Le(a, b)
+  for bc: Z.Integer.Le(b, c)
+  Z.Integer.Le(a, c)
+
 law rational_eq_reflexive:
   for x: Q.Rational
   Q.Rational.Eq(x, x)
@@ -137,6 +159,19 @@ law rational_eq_symmetric:
 law rational_le_reflexive:
   for x: Q.Rational
   Q.Rational.Le(x, x)
+
+law rational_le_antisymmetric:
+  for x: Q.Rational
+  for y: Q.Rational
+  for xy: Q.Rational.Le(x, y)
+  for yx: Q.Rational.Le(y, x)
+  Q.Rational.Eq(x, y)
+
+law rational_eq_implies_le:
+  for x: Q.Rational
+  for y: Q.Rational
+  for proof: Q.Rational.Eq(x, y)
+  Q.Rational.Le(x, y)
 
 law rational_denominator_product:
   for a: Nat

@@ -58,6 +58,17 @@ def Natural.le_transitive(a: Nat, b: Nat, c: Nat, ab: Natural.Le(a, b), bc: Natu
             case 1n+cp:
               Natural.le_transitive(ap, bp, cp, ab, bc)
 
+def Natural.le_antisymmetric(a: Nat, b: Nat, ab: Natural.Le(a, b), ba: Natural.Le(b, a)) -> {a == b : Nat}:
+  match a b:
+    case 0n 0n:
+      {==}
+    case 0n 1n+bp:
+      match ba:
+    case 1n+ap 0n:
+      match ab:
+    case 1n+ap 1n+bp:
+      Equal.cong(Nat, Nat, z => 1n+z, ap, bp, Natural.le_antisymmetric(ap, bp, ab, ba))
+
 def Natural.add_zero(n: Nat) -> {Nat.add(n, 0n) == n : Nat}:
   match n:
     case 0n:

@@ -75,6 +75,13 @@ def Rational.eq_symmetric(+x: Rational, +y: Rational, proof: Rational.Eq(x, y)) 
 def Rational.le_reflexive(+x: Rational) -> Rational.Le(x, x):
   Z.Integer.le_reflexive(Rational.cross(x, x))
 
+def Rational.le_antisymmetric(+x: Rational, +y: Rational, xy: Rational.Le(x, y), yx: Rational.Le(y, x)) -> Rational.Eq(x, y):
+  Z.Integer.le_antisymmetric(Rational.cross(x, y), Rational.cross(y, x), xy, yx)
+
+def Rational.eq_implies_le(+x: Rational, +y: Rational, proof: Rational.Eq(x, y)) -> Rational.Le(x, y):
+  %proof : Z.Integer.Le(Rational.cross(x, y), _)
+  Z.Integer.le_reflexive(Rational.cross(x, y))
+
 def Rational.two_power_predecessor(n: Nat) -> Nat:
   match n:
     case 0n:

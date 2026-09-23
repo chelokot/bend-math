@@ -11,6 +11,9 @@ def Laws.natural_le_reflexive(n):
 def Laws.natural_le_transitive(a, b, c, ab, bc):
   N.Natural.le_transitive(a, b, c, ab, bc)
 
+def Laws.natural_le_antisymmetric(a, b, ab, ba):
+  N.Natural.le_antisymmetric(a, b, ab, ba)
+
 def Laws.natural_le_add_right(a, b):
   N.Natural.le_add_right(a, b)
 
@@ -80,6 +83,12 @@ def Laws.integer_add_neg_self(x):
 def Laws.integer_le_reflexive(x):
   Z.Integer.le_reflexive(x)
 
+def Laws.integer_le_antisymmetric(a, b, ab, ba):
+  Z.Integer.le_antisymmetric(a, b, ab, ba)
+
+def Laws.integer_le_transitive(a, b, c, ab, bc):
+  Z.Integer.le_transitive(a, b, c, ab, bc)
+
 def Laws.rational_eq_reflexive(x):
   Q.Rational.eq_reflexive(x)
 
@@ -88,6 +97,12 @@ def Laws.rational_eq_symmetric(x, y, proof):
 
 def Laws.rational_le_reflexive(x):
   Q.Rational.le_reflexive(x)
+
+def Laws.rational_le_antisymmetric(x, y, xy, yx):
+  Q.Rational.le_antisymmetric(x, y, xy, yx)
+
+def Laws.rational_eq_implies_le(x, y, proof):
+  Q.Rational.eq_implies_le(x, y, proof)
 
 def Laws.rational_denominator_product(a, b):
   Q.Rational.denominator_product_spec(a, b)
