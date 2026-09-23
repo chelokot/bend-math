@@ -245,6 +245,15 @@ def Laws.rational_dyadic_nonnegative(n):
 def Laws.rational_dyadic_denominator_doubles(n):
   Q.Rational.dyadic_denominator_next(n)
 
+def Laws.rational_dyadic_double(n):
+  Q.Rational.dyadic_double(n)
+
+def Laws.rational_close_add_same_errors(a, b, c, d, left_error, right_error, first, second):
+  Q.Rational.close_add_same_errors(a, b, c, d, left_error, right_error, first, second)
+
+def Laws.rational_close_halve_errors(x, y, n, m, proof):
+  Q.Rational.close_halve_errors(x, y, n, m, proof)
+
 def Laws.real_zero_exists():
   R.Real.zero()
 

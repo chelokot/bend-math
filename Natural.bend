@@ -1060,3 +1060,43 @@ def Natural.mul_left_cancel_positive(+k: Nat, +a: Nat, +b: Nat, proof: {Nat.mul(
         Nat.mul(b, 1n+k),
         proof,
         Natural.mul_commutative(1n+k, b))))
+
+def Natural.two_unit_cross(+half_denominator: Nat, +whole_denominator: Nat,
+  equality: {half_denominator == Nat.add(whole_denominator, whole_denominator) : Nat}) ->
+  {Nat.mul(Nat.add(Nat.mul(1n, half_denominator), Nat.mul(1n, half_denominator)), whole_denominator) ==
+   Nat.mul(1n, Nat.mul(half_denominator, half_denominator)) : Nat}:
+  +twice_half: Nat = Nat.add(half_denominator, half_denominator)
+  +twice_whole: Nat = Nat.add(whole_denominator, whole_denominator)
+  Equal.trans(Nat,
+    Nat.mul(Nat.add(Nat.mul(1n, half_denominator), Nat.mul(1n, half_denominator)), whole_denominator),
+    Nat.mul(twice_half, whole_denominator),
+    Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
+    Equal.cong(Nat, Nat, z => Nat.mul(z, whole_denominator),
+      Nat.add(Nat.mul(1n, half_denominator), Nat.mul(1n, half_denominator)), twice_half,
+      Natural.eq_add_congruent(
+        Nat.mul(1n, half_denominator), Nat.mul(1n, half_denominator),
+        half_denominator, half_denominator,
+        Natural.one_mul(half_denominator), Natural.one_mul(half_denominator))),
+    Equal.trans(Nat,
+      Nat.mul(twice_half, whole_denominator),
+      Nat.add(Nat.mul(half_denominator, whole_denominator), Nat.mul(half_denominator, whole_denominator)),
+      Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
+      Natural.mul_add_left(half_denominator, half_denominator, whole_denominator),
+      Equal.trans(Nat,
+        Nat.add(Nat.mul(half_denominator, whole_denominator), Nat.mul(half_denominator, whole_denominator)),
+        Nat.mul(half_denominator, twice_whole),
+        Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
+        Equal.sym(Nat,
+          Nat.mul(half_denominator, twice_whole),
+          Nat.add(Nat.mul(half_denominator, whole_denominator), Nat.mul(half_denominator, whole_denominator)),
+          Natural.mul_add_right(half_denominator, whole_denominator, whole_denominator)),
+        Equal.trans(Nat,
+          Nat.mul(half_denominator, twice_whole),
+          Nat.mul(half_denominator, half_denominator),
+          Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
+          Equal.cong(Nat, Nat, z => Nat.mul(half_denominator, z), twice_whole, half_denominator,
+            Equal.sym(Nat, half_denominator, twice_whole, equality)),
+          Equal.sym(Nat,
+            Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
+            Nat.mul(half_denominator, half_denominator),
+            Natural.one_mul(Nat.mul(half_denominator, half_denominator)))))))

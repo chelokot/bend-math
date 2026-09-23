@@ -461,6 +461,32 @@ law rational_dyadic_denominator_doubles:
   {Q.Rational.denominator(Q.Rational.dyadic(1n+n)) ==
    Nat.add(Q.Rational.denominator(Q.Rational.dyadic(n)), Q.Rational.denominator(Q.Rational.dyadic(n))) : Nat}
 
+law rational_dyadic_double:
+  for n: Nat
+  Q.Rational.Eq(Q.Rational.add(Q.Rational.dyadic(1n+n), Q.Rational.dyadic(1n+n)), Q.Rational.dyadic(n))
+
+law rational_close_add_same_errors:
+  for a: Q.Rational
+  for b: Q.Rational
+  for c: Q.Rational
+  for d: Q.Rational
+  for left_error: Q.Rational
+  for right_error: Q.Rational
+  for first: Q.Rational.Close(a, b, left_error, right_error)
+  for second: Q.Rational.Close(c, d, left_error, right_error)
+  Q.Rational.Close(Q.Rational.add(a, c), Q.Rational.add(b, d),
+    Q.Rational.add(left_error, left_error), Q.Rational.add(right_error, right_error))
+
+law rational_close_halve_errors:
+  for x: Q.Rational
+  for y: Q.Rational
+  for n: Nat
+  for m: Nat
+  for proof: Q.Rational.Close(x, y,
+    Q.Rational.add(Q.Rational.dyadic(1n+n), Q.Rational.dyadic(1n+n)),
+    Q.Rational.add(Q.Rational.dyadic(1n+m), Q.Rational.dyadic(1n+m)))
+  Q.Rational.Close(x, y, Q.Rational.dyadic(n), Q.Rational.dyadic(m))
+
 law real_zero_exists:
   R.Real
 

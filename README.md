@@ -23,6 +23,14 @@ Transitivity, field operations, order, completeness, and compatibility with
 the rational quotient are still open work. The checked definitions alone do
 not license any theorem about square packing.
 
+There is also a representation-level obstacle in Bend 2.0.25. A Cauchy real
+contains a function from precision to rational approximations, so its type is
+`Type`, not duplicable `Data`. The checker rejects using that function both to
+compute an output sequence and to prove its regularity. Erasing the regularity
+field does not solve this: its proof cannot then be used to establish even
+reflexivity of real equality. The rational error estimates needed for addition
+are checked, but a sound way to lift them to arbitrary Cauchy reals remains open.
+
 `Rational.bend` stores a numerator as the difference of two naturals and a
 strictly positive denominator as one plus a natural. Different records can
 denote the same rational; equality and order use cross multiplication. This

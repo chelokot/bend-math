@@ -196,6 +196,44 @@ def Rational.add_associative(a: Rational, b: Rational, c: Rational) -> {Rational
         Rational.add_associative_numerator(an, bn, cn, ad, bd, cd),
         Rational.denominator_product_associative(ad, bd, cd))
 
+def Rational.add_swap(+a: Rational, +b: Rational, +c: Rational) ->
+  {Rational.add(a, Rational.add(b, c)) == Rational.add(b, Rational.add(a, c)) : Rational}:
+  Equal.trans(Rational,
+    Rational.add(a, Rational.add(b, c)),
+    Rational.add(Rational.add(a, b), c),
+    Rational.add(b, Rational.add(a, c)),
+    Equal.sym(Rational,
+      Rational.add(Rational.add(a, b), c),
+      Rational.add(a, Rational.add(b, c)),
+      Rational.add_associative(a, b, c)),
+    Equal.trans(Rational,
+      Rational.add(Rational.add(a, b), c),
+      Rational.add(Rational.add(b, a), c),
+      Rational.add(b, Rational.add(a, c)),
+      Equal.cong(Rational, Rational, z => Rational.add(z, c),
+        Rational.add(a, b), Rational.add(b, a), Rational.add_commutative(a, b)),
+      Rational.add_associative(b, a, c)))
+
+def Rational.add_middle_commute(+a: Rational, +b: Rational, +c: Rational, +d: Rational) ->
+  {Rational.add(Rational.add(a, b), Rational.add(c, d)) ==
+   Rational.add(Rational.add(a, c), Rational.add(b, d)) : Rational}:
+  Equal.trans(Rational,
+    Rational.add(Rational.add(a, b), Rational.add(c, d)),
+    Rational.add(a, Rational.add(b, Rational.add(c, d))),
+    Rational.add(Rational.add(a, c), Rational.add(b, d)),
+    Rational.add_associative(a, b, Rational.add(c, d)),
+    Equal.trans(Rational,
+      Rational.add(a, Rational.add(b, Rational.add(c, d))),
+      Rational.add(a, Rational.add(c, Rational.add(b, d))),
+      Rational.add(Rational.add(a, c), Rational.add(b, d)),
+      Equal.cong(Rational, Rational, z => Rational.add(a, z),
+        Rational.add(b, Rational.add(c, d)), Rational.add(c, Rational.add(b, d)),
+        Rational.add_swap(b, c, d)),
+      Equal.sym(Rational,
+        Rational.add(Rational.add(a, c), Rational.add(b, d)),
+        Rational.add(a, Rational.add(c, Rational.add(b, d))),
+        Rational.add_associative(a, c, Rational.add(b, d)))))
+
 def Rational.add_zero(x: Rational) -> {Rational.add(x, Rational.zero()) == x : Rational}:
   match x:
     case Fraction{+xp, +xn, +xd}:
@@ -950,6 +988,64 @@ def Rational.le_add_left(+x: Rational, +y: Rational, +z: Rational, xy: Rational.
     Rational.le_add_right(x, y, z, xy),
     Rational.add_commutative(x, z), Rational.add_commutative(y, z))
 
+def Rational.le_add_both(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  ab: Rational.Le(a, b), cd: Rational.Le(c, d)) -> Rational.Le(Rational.add(a, c), Rational.add(b, d)):
+  Rational.le_transitive(Rational.add(a, c), Rational.add(b, c), Rational.add(b, d),
+    Rational.le_add_right(a, b, c, ab),
+    Rational.le_add_left(c, d, b, cd))
+
+def Rational.le_add_with_common_error(+a: Rational, +b: Rational, +c: Rational, +d: Rational, +error: Rational,
+  ab: Rational.Le(a, Rational.add(b, error)),
+  cd: Rational.Le(c, Rational.add(d, error))) ->
+  Rational.Le(Rational.add(a, c), Rational.add(Rational.add(b, d), Rational.add(error, error))):
+  Rational.le_structural_congruent(
+    Rational.add(a, c),
+    Rational.add(Rational.add(b, error), Rational.add(d, error)),
+    Rational.add(a, c),
+    Rational.add(Rational.add(b, d), Rational.add(error, error)),
+    Rational.le_add_both(a, Rational.add(b, error), c, Rational.add(d, error), ab, cd),
+    {==},
+    Rational.add_middle_commute(b, error, d, error))
+
+def Rational.close_add_same_errors(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  +left_error: Rational, +right_error: Rational,
+  first: Rational.Close(a, b, left_error, right_error),
+  second: Rational.Close(c, d, left_error, right_error)) ->
+  Rational.Close(Rational.add(a, c), Rational.add(b, d),
+    Rational.add(left_error, left_error), Rational.add(right_error, right_error)):
+  (first_forward, first_backward) = first
+  (second_forward, second_backward) = second
+  +forward_error: Rational = Rational.add(left_error, right_error)
+  +backward_error: Rational = Rational.add(right_error, left_error)
+  (
+    Rational.le_structural_congruent(
+      Rational.add(a, c),
+      Rational.add(Rational.add(b, d), Rational.add(forward_error, forward_error)),
+      Rational.add(a, c),
+      Rational.add(Rational.add(b, d),
+        Rational.add(Rational.add(left_error, left_error), Rational.add(right_error, right_error))),
+      Rational.le_add_with_common_error(a, b, c, d, forward_error,
+        first_forward, second_forward),
+      {==},
+      Equal.cong(Rational, Rational, z => Rational.add(Rational.add(b, d), z),
+        Rational.add(forward_error, forward_error),
+        Rational.add(Rational.add(left_error, left_error), Rational.add(right_error, right_error)),
+        Rational.add_middle_commute(left_error, right_error, left_error, right_error))),
+    Rational.le_structural_congruent(
+      Rational.add(b, d),
+      Rational.add(Rational.add(a, c), Rational.add(backward_error, backward_error)),
+      Rational.add(b, d),
+      Rational.add(Rational.add(a, c),
+        Rational.add(Rational.add(right_error, right_error), Rational.add(left_error, left_error))),
+      Rational.le_add_with_common_error(b, a, d, c, backward_error,
+        first_backward, second_backward),
+      {==},
+      Equal.cong(Rational, Rational, z => Rational.add(Rational.add(a, c), z),
+        Rational.add(backward_error, backward_error),
+        Rational.add(Rational.add(right_error, right_error), Rational.add(left_error, left_error)),
+        Rational.add_middle_commute(right_error, left_error, right_error, left_error)))
+  )
+
 def Rational.add_nonnegative(+x: Rational, +y: Rational,
   x_nonnegative: Rational.Le(Rational.zero(), x),
   y_nonnegative: Rational.Le(Rational.zero(), y)) ->
@@ -999,6 +1095,33 @@ def Rational.eq_add_both(+x: Rational, +x_replacement: Rational, +y: Rational, +
     Rational.add(x, y), Rational.add(x_replacement, y), Rational.add(x_replacement, y_replacement),
     Rational.eq_add_right(x, x_replacement, y, x_equal),
     Rational.eq_add_left(y, y_replacement, x_replacement, y_equal))
+
+def Rational.close_replace_errors(+x: Rational, +y: Rational,
+  +left_error: Rational, +right_error: Rational,
+  +new_left_error: Rational, +new_right_error: Rational,
+  proof: Rational.Close(x, y, left_error, right_error),
+  forward_equality: Rational.Eq(Rational.add(left_error, right_error), Rational.add(new_left_error, new_right_error)),
+  backward_equality: Rational.Eq(Rational.add(right_error, left_error), Rational.add(new_right_error, new_left_error))) ->
+  Rational.Close(x, y, new_left_error, new_right_error):
+  (forward, backward) = proof
+  (
+    Rational.le_replace(x, x,
+      Rational.add(y, Rational.add(left_error, right_error)),
+      Rational.add(y, Rational.add(new_left_error, new_right_error)),
+      Rational.eq_reflexive(x),
+      Rational.eq_add_left(
+        Rational.add(left_error, right_error), Rational.add(new_left_error, new_right_error),
+        y, forward_equality),
+      forward),
+    Rational.le_replace(y, y,
+      Rational.add(x, Rational.add(right_error, left_error)),
+      Rational.add(x, Rational.add(new_right_error, new_left_error)),
+      Rational.eq_reflexive(y),
+      Rational.eq_add_left(
+        Rational.add(right_error, left_error), Rational.add(new_right_error, new_left_error),
+        x, backward_equality),
+      backward)
+  )
 
 def Rational.eq_mul_right_core(
   +xp: Nat, +xn: Nat, +xd: Nat,
@@ -1206,6 +1329,56 @@ def Rational.dyadic_denominator_next(n: Nat) ->
   {Rational.denominator(Rational.dyadic(1n+n)) ==
    Nat.add(Rational.denominator(Rational.dyadic(n)), Rational.denominator(Rational.dyadic(n))) : Nat}:
   N.Natural.successor_double(Rational.two_power_predecessor(n))
+
+def Rational.two_unit_halves(+half_predecessor: Nat, +whole_predecessor: Nat,
+  equality: {1n+half_predecessor == Nat.add(1n+whole_predecessor, 1n+whole_predecessor) : Nat}) ->
+  Rational.Eq(
+    Rational.add(Fraction{1n, 0n, half_predecessor}, Fraction{1n, 0n, half_predecessor}),
+    Fraction{1n, 0n, whole_predecessor}):
+  +half_denominator: Nat = 1n+half_predecessor
+  +whole_denominator: Nat = 1n+whole_predecessor
+  +sum_denominator: Nat = 1n+Rational.denominator_product(half_predecessor, half_predecessor)
+  +positive_sum: Nat = Nat.add(Nat.mul(1n, half_denominator), Nat.mul(1n, half_denominator))
+  Equal.cong(Nat, Nat, z => Nat.add(z, 0n),
+    Nat.mul(positive_sum, whole_denominator),
+    Nat.mul(1n, sum_denominator),
+    Equal.trans(Nat,
+      Nat.mul(positive_sum, whole_denominator),
+      Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
+      Nat.mul(1n, sum_denominator),
+      N.Natural.two_unit_cross(half_denominator, whole_denominator, equality),
+      Equal.cong(Nat, Nat, z => Nat.mul(1n, z),
+        Nat.mul(half_denominator, half_denominator), sum_denominator,
+        Equal.sym(Nat,
+          sum_denominator, Nat.mul(half_denominator, half_denominator),
+          Rational.denominator_product_spec(half_predecessor, half_predecessor)))))
+
+def Rational.dyadic_double(+n: Nat) ->
+  Rational.Eq(
+    Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)),
+    Rational.dyadic(n)):
+  Rational.two_unit_halves(
+    Rational.two_power_predecessor(1n+n),
+    Rational.two_power_predecessor(n),
+    Rational.dyadic_denominator_next(n))
+
+def Rational.close_halve_errors(+x: Rational, +y: Rational, +n: Nat, +m: Nat,
+  proof: Rational.Close(x, y,
+    Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)),
+    Rational.add(Rational.dyadic(1n+m), Rational.dyadic(1n+m)))) ->
+  Rational.Close(x, y, Rational.dyadic(n), Rational.dyadic(m)):
+  Rational.close_replace_errors(x, y,
+    Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)),
+    Rational.add(Rational.dyadic(1n+m), Rational.dyadic(1n+m)),
+    Rational.dyadic(n), Rational.dyadic(m), proof,
+    Rational.eq_add_both(
+      Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)), Rational.dyadic(n),
+      Rational.add(Rational.dyadic(1n+m), Rational.dyadic(1n+m)), Rational.dyadic(m),
+      Rational.dyadic_double(n), Rational.dyadic_double(m)),
+    Rational.eq_add_both(
+      Rational.add(Rational.dyadic(1n+m), Rational.dyadic(1n+m)), Rational.dyadic(m),
+      Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)), Rational.dyadic(n),
+      Rational.dyadic_double(m), Rational.dyadic_double(n)))
 
 def Rational.dyadic_nonnegative(n: Nat) -> Rational.Le(Rational.zero(), Rational.dyadic(n)):
   N.Natural.zero_le(1n)
