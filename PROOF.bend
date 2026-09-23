@@ -8,6 +8,9 @@ import ./Real.bend as R
 def Laws.natural_le_reflexive(n):
   N.Natural.le_reflexive(n)
 
+def Laws.natural_le_total(a, b):
+  N.Natural.le_total(a, b)
+
 def Laws.natural_le_transitive(a, b, c, ab, bc):
   N.Natural.le_transitive(a, b, c, ab, bc)
 
@@ -140,6 +143,12 @@ def Laws.rational_eq_negated(x, y, proof):
 def Laws.rational_le_reflexive(x):
   Q.Rational.le_reflexive(x)
 
+def Laws.rational_le_total(x, y):
+  Q.Rational.le_total(x, y)
+
+def Laws.rational_zero_ne_one(proof):
+  Q.Rational.zero_ne_one(proof)
+
 def Laws.rational_le_transitive(x, y, z, xy, yz):
   Q.Rational.le_transitive(x, y, z, xy, yz)
 
@@ -154,6 +163,27 @@ def Laws.rational_le_negated(x, y, proof):
 
 def Laws.rational_denominator_product(a, b):
   Q.Rational.denominator_product_spec(a, b)
+
+def Laws.rational_add_commutative(a, b):
+  Q.Rational.add_commutative(a, b)
+
+def Laws.rational_mul_commutative(a, b):
+  Q.Rational.mul_commutative(a, b)
+
+def Laws.rational_add_zero(x):
+  Q.Rational.add_zero(x)
+
+def Laws.rational_zero_add(x):
+  Q.Rational.zero_add(x)
+
+def Laws.rational_mul_one(x):
+  Q.Rational.mul_one(x)
+
+def Laws.rational_one_mul(x):
+  Q.Rational.one_mul(x)
+
+def Laws.rational_add_neg_self(x):
+  Q.Rational.add_neg_self(x)
 
 def Laws.real_zero_exists():
   R.Real.zero()

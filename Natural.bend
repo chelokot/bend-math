@@ -18,6 +18,17 @@ def Natural.le_reflexive(n: Nat) -> Natural.Le(n, n):
     case 1n+p:
       Natural.le_reflexive(p)
 
+def Natural.le_total(a: Nat, b: Nat) -> Or(Natural.Le(a, b), Natural.Le(b, a)):
+  match a b:
+    case 0n 0n:
+      Inl{Unit{}}
+    case 0n 1n+bp:
+      Inl{Unit{}}
+    case 1n+ap 0n:
+      Inr{Unit{}}
+    case 1n+ap 1n+bp:
+      Natural.le_total(ap, bp)
+
 def Natural.zero_le(n: Nat) -> Natural.Le(0n, n):
   match n:
     case 0n:

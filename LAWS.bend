@@ -8,6 +8,11 @@ law natural_le_reflexive:
   for n: Nat
   N.Natural.Le(n, n)
 
+law natural_le_total:
+  for a: Nat
+  for b: Nat
+  Or(N.Natural.Le(a, b), N.Natural.Le(b, a))
+
 law natural_le_transitive:
   for a: Nat
   for b: Nat
@@ -259,6 +264,14 @@ law rational_le_reflexive:
   for x: Q.Rational
   Q.Rational.Le(x, x)
 
+law rational_le_total:
+  for x: Q.Rational
+  for y: Q.Rational
+  Or(Q.Rational.Le(x, y), Q.Rational.Le(y, x))
+
+law rational_zero_ne_one:
+  Q.Rational.Eq(Q.Rational.zero(), Q.Rational.one()) -> Empty
+
 law rational_le_transitive:
   for x: Q.Rational
   for y: Q.Rational
@@ -290,6 +303,36 @@ law rational_denominator_product:
   for a: Nat
   for b: Nat
   {1n+Q.Rational.denominator_product(a, b) == Nat.mul(1n+a, 1n+b) : Nat}
+
+law rational_add_commutative:
+  for a: Q.Rational
+  for b: Q.Rational
+  {Q.Rational.add(a, b) == Q.Rational.add(b, a) : Q.Rational}
+
+law rational_mul_commutative:
+  for a: Q.Rational
+  for b: Q.Rational
+  {Q.Rational.mul(a, b) == Q.Rational.mul(b, a) : Q.Rational}
+
+law rational_add_zero:
+  for x: Q.Rational
+  {Q.Rational.add(x, Q.Rational.zero()) == x : Q.Rational}
+
+law rational_zero_add:
+  for x: Q.Rational
+  {Q.Rational.add(Q.Rational.zero(), x) == x : Q.Rational}
+
+law rational_mul_one:
+  for x: Q.Rational
+  {Q.Rational.mul(x, Q.Rational.one()) == x : Q.Rational}
+
+law rational_one_mul:
+  for x: Q.Rational
+  {Q.Rational.mul(Q.Rational.one(), x) == x : Q.Rational}
+
+law rational_add_neg_self:
+  for x: Q.Rational
+  Q.Rational.Eq(Q.Rational.add(x, Q.Rational.neg(x)), Q.Rational.zero())
 
 law real_zero_exists:
   R.Real

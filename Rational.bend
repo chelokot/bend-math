@@ -5,6 +5,12 @@ import ./Integer.bend as Z
 type Rational is Data:
   Fraction{positive: Nat, negative: Nat, denominator_predecessor: Nat}
 
+def Rational.zero() -> Rational:
+  Fraction{0n, 0n, 0n}
+
+def Rational.one() -> Rational:
+  Fraction{1n, 0n, 0n}
+
 def Rational.of_integer(x: Z.Integer) -> Rational:
   match x:
     case Z.ZPos{magnitude}:
@@ -36,6 +42,34 @@ def Rational.denominator_product(a: Nat, +b: Nat) -> Nat:
 def Rational.denominator_product_spec(a: Nat, +b: Nat) -> {1n+Rational.denominator_product(a, b) == Nat.mul(1n+a, 1n+b) : Nat}:
   {==}
 
+def Rational.denominator_product_commutative(+a: Nat, +b: Nat) -> {Rational.denominator_product(a, b) == Rational.denominator_product(b, a) : Nat}:
+  N.Natural.successor_injective(Rational.denominator_product(a, b), Rational.denominator_product(b, a),
+    Equal.trans(Nat,
+      1n+Rational.denominator_product(a, b),
+      Nat.mul(1n+a, 1n+b),
+      1n+Rational.denominator_product(b, a),
+      Rational.denominator_product_spec(a, b),
+      Equal.trans(Nat,
+        Nat.mul(1n+a, 1n+b),
+        Nat.mul(1n+b, 1n+a),
+        1n+Rational.denominator_product(b, a),
+        N.Natural.mul_commutative(1n+a, 1n+b),
+        Equal.sym(Nat,
+          1n+Rational.denominator_product(b, a),
+          Nat.mul(1n+b, 1n+a),
+          Rational.denominator_product_spec(b, a)))))
+
+def Rational.fraction_congruent(+ap: Nat, +an: Nat, +ad: Nat, +bp: Nat, +bn: Nat, +bd: Nat,
+  ep: {ap == bp : Nat}, en: {an == bn : Nat}, ed: {ad == bd : Nat}) ->
+  {Fraction{ap, an, ad} == Fraction{bp, bn, bd} : Rational}:
+  Equal.trans(Rational,
+    Fraction{ap, an, ad}, Fraction{bp, an, ad}, Fraction{bp, bn, bd},
+    Equal.cong(Nat, Rational, z => Fraction{z, an, ad}, ap, bp, ep),
+    Equal.trans(Rational,
+      Fraction{bp, an, ad}, Fraction{bp, bn, ad}, Fraction{bp, bn, bd},
+      Equal.cong(Nat, Rational, z => Fraction{bp, z, ad}, an, bn, en),
+      Equal.cong(Nat, Rational, z => Fraction{bp, bn, z}, ad, bd, ed)))
+
 def Rational.add(a: Rational, b: Rational) -> Rational:
   match a b:
     case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd}:
@@ -44,6 +78,42 @@ def Rational.add(a: Rational, b: Rational) -> Rational:
         Nat.add(Nat.mul(an, 1n+bd), Nat.mul(bn, 1n+ad)),
         Rational.denominator_product(ad, bd)
       }
+
+def Rational.add_commutative(a: Rational, b: Rational) -> {Rational.add(a, b) == Rational.add(b, a) : Rational}:
+  match a b:
+    case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd}:
+      Rational.fraction_congruent(
+        Nat.add(Nat.mul(ap, 1n+bd), Nat.mul(bp, 1n+ad)),
+        Nat.add(Nat.mul(an, 1n+bd), Nat.mul(bn, 1n+ad)),
+        Rational.denominator_product(ad, bd),
+        Nat.add(Nat.mul(bp, 1n+ad), Nat.mul(ap, 1n+bd)),
+        Nat.add(Nat.mul(bn, 1n+ad), Nat.mul(an, 1n+bd)),
+        Rational.denominator_product(bd, ad),
+        N.Natural.add_commutative(Nat.mul(ap, 1n+bd), Nat.mul(bp, 1n+ad)),
+        N.Natural.add_commutative(Nat.mul(an, 1n+bd), Nat.mul(bn, 1n+ad)),
+        Rational.denominator_product_commutative(ad, bd))
+
+def Rational.add_zero(x: Rational) -> {Rational.add(x, Rational.zero()) == x : Rational}:
+  match x:
+    case Fraction{+xp, +xn, +xd}:
+      Rational.fraction_congruent(
+        Nat.add(Nat.mul(xp, 1n), 0n),
+        Nat.add(Nat.mul(xn, 1n), 0n),
+        Rational.denominator_product(xd, 0n),
+        xp, xn, xd,
+        Equal.trans(Nat,
+          Nat.add(Nat.mul(xp, 1n), 0n), Nat.mul(xp, 1n), xp,
+          N.Natural.add_zero(Nat.mul(xp, 1n)), N.Natural.mul_one(xp)),
+        Equal.trans(Nat,
+          Nat.add(Nat.mul(xn, 1n), 0n), Nat.mul(xn, 1n), xn,
+          N.Natural.add_zero(Nat.mul(xn, 1n)), N.Natural.mul_one(xn)),
+        N.Natural.mul_one(xd))
+
+def Rational.zero_add(+x: Rational) -> {Rational.add(Rational.zero(), x) == x : Rational}:
+  Equal.trans(Rational,
+    Rational.add(Rational.zero(), x), Rational.add(x, Rational.zero()), x,
+    Rational.add_commutative(Rational.zero(), x),
+    Rational.add_zero(x))
 
 def Rational.neg(x: Rational) -> Rational:
   match x:
@@ -67,6 +137,57 @@ def Rational.mul(a: Rational, b: Rational) -> Rational:
         Rational.denominator_product(ad, bd)
       }
 
+def Rational.mul_commutative(a: Rational, b: Rational) -> {Rational.mul(a, b) == Rational.mul(b, a) : Rational}:
+  match a b:
+    case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd}:
+      Rational.fraction_congruent(
+        Nat.add(Nat.mul(ap, bp), Nat.mul(an, bn)),
+        Nat.add(Nat.mul(ap, bn), Nat.mul(an, bp)),
+        Rational.denominator_product(ad, bd),
+        Nat.add(Nat.mul(bp, ap), Nat.mul(bn, an)),
+        Nat.add(Nat.mul(bp, an), Nat.mul(bn, ap)),
+        Rational.denominator_product(bd, ad),
+        N.Natural.eq_add_congruent(
+          Nat.mul(ap, bp), Nat.mul(an, bn), Nat.mul(bp, ap), Nat.mul(bn, an),
+          N.Natural.mul_commutative(ap, bp), N.Natural.mul_commutative(an, bn)),
+        Equal.trans(Nat,
+          Nat.add(Nat.mul(ap, bn), Nat.mul(an, bp)),
+          Nat.add(Nat.mul(bn, ap), Nat.mul(bp, an)),
+          Nat.add(Nat.mul(bp, an), Nat.mul(bn, ap)),
+          N.Natural.eq_add_congruent(
+            Nat.mul(ap, bn), Nat.mul(an, bp), Nat.mul(bn, ap), Nat.mul(bp, an),
+            N.Natural.mul_commutative(ap, bn), N.Natural.mul_commutative(an, bp)),
+          N.Natural.add_commutative(Nat.mul(bn, ap), Nat.mul(bp, an))),
+        Rational.denominator_product_commutative(ad, bd))
+
+def Rational.mul_one(x: Rational) -> {Rational.mul(x, Rational.one()) == x : Rational}:
+  match x:
+    case Fraction{+xp, +xn, +xd}:
+      Rational.fraction_congruent(
+        Nat.add(Nat.mul(xp, 1n), Nat.mul(xn, 0n)),
+        Nat.add(Nat.mul(xp, 0n), Nat.mul(xn, 1n)),
+        Rational.denominator_product(xd, 0n),
+        xp, xn, xd,
+        Equal.trans(Nat,
+          Nat.add(Nat.mul(xp, 1n), Nat.mul(xn, 0n)),
+          Nat.add(xp, 0n), xp,
+          N.Natural.eq_add_congruent(Nat.mul(xp, 1n), Nat.mul(xn, 0n), xp, 0n,
+            N.Natural.mul_one(xp), N.Natural.mul_zero(xn)),
+          N.Natural.add_zero(xp)),
+        Equal.trans(Nat,
+          Nat.add(Nat.mul(xp, 0n), Nat.mul(xn, 1n)),
+          Nat.add(0n, xn), xn,
+          N.Natural.eq_add_congruent(Nat.mul(xp, 0n), Nat.mul(xn, 1n), 0n, xn,
+            N.Natural.mul_zero(xp), N.Natural.mul_one(xn)),
+          {==}),
+        N.Natural.mul_one(xd))
+
+def Rational.one_mul(+x: Rational) -> {Rational.mul(Rational.one(), x) == x : Rational}:
+  Equal.trans(Rational,
+    Rational.mul(Rational.one(), x), Rational.mul(x, Rational.one()), x,
+    Rational.mul_commutative(Rational.one(), x),
+    Rational.mul_one(x))
+
 def Rational.left_cross(+x: Rational, +y: Rational) -> Nat:
   Nat.add(Nat.mul(Rational.positive(x), Rational.denominator(y)), Nat.mul(Rational.negative(y), Rational.denominator(x)))
 
@@ -76,8 +197,33 @@ def Rational.right_cross(+x: Rational, +y: Rational) -> Nat:
 def Rational.Eq(+x: Rational, +y: Rational) -> Type:
   {Rational.left_cross(x, y) == Rational.right_cross(x, y) : Nat}
 
+def Rational.eq_zero_if_balanced(+positive: Nat, +negative: Nat, +denominator_predecessor: Nat, proof: {positive == negative : Nat}) -> Rational.Eq(Fraction{positive, negative, denominator_predecessor}, Rational.zero()):
+  Equal.trans(Nat,
+    Nat.add(Nat.mul(positive, 1n), 0n),
+    Nat.add(0n, Nat.mul(positive, 1n)),
+    Nat.add(0n, Nat.mul(negative, 1n)),
+    N.Natural.add_commutative(Nat.mul(positive, 1n), 0n),
+    Equal.cong(Nat, Nat, z => Nat.add(0n, Nat.mul(z, 1n)), positive, negative, proof))
+
+def Rational.add_neg_self(x: Rational) -> Rational.Eq(Rational.add(x, Rational.neg(x)), Rational.zero()):
+  match x:
+    case Fraction{+positive, +negative, +denominator_predecessor}:
+      Rational.eq_zero_if_balanced(
+        Nat.add(Nat.mul(positive, 1n+denominator_predecessor), Nat.mul(negative, 1n+denominator_predecessor)),
+        Nat.add(Nat.mul(negative, 1n+denominator_predecessor), Nat.mul(positive, 1n+denominator_predecessor)),
+        Rational.denominator_product(denominator_predecessor, denominator_predecessor),
+        N.Natural.add_commutative(
+          Nat.mul(positive, 1n+denominator_predecessor),
+          Nat.mul(negative, 1n+denominator_predecessor)))
+
 def Rational.Le(+x: Rational, +y: Rational) -> Type:
   N.Natural.Le(Rational.left_cross(x, y), Rational.right_cross(x, y))
+
+def Rational.le_total(+x: Rational, +y: Rational) -> Or(Rational.Le(x, y), Rational.Le(y, x)):
+  N.Natural.le_total(Rational.left_cross(x, y), Rational.right_cross(x, y))
+
+def Rational.zero_ne_one(proof: Rational.Eq(Rational.zero(), Rational.one())) -> Empty:
+  N.Natural.zero_not_successor(0n, proof)
 
 def Rational.Close(+x: Rational, +y: Rational, +left_error: Rational, +right_error: Rational) -> Type:
   Rational.Le(x, Rational.add(y, Rational.add(left_error, right_error))) & Rational.Le(y, Rational.add(x, Rational.add(right_error, left_error)))
