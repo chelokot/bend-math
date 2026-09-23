@@ -108,6 +108,10 @@ law natural_add_associative:
   for c: Nat
   {Nat.add(Nat.add(a, b), c) == Nat.add(a, Nat.add(b, c)) : Nat}
 
+law natural_double_add:
+  for n: Nat
+  {Nat.double(n) == Nat.add(n, n) : Nat}
+
 law natural_add_left_cancel:
   for c: Nat
   for a: Nat
@@ -274,6 +278,20 @@ law rational_le_total:
   for y: Q.Rational
   Or(Q.Rational.Le(x, y), Q.Rational.Le(y, x))
 
+law rational_mul_nonnegative:
+  for x: Q.Rational
+  for y: Q.Rational
+  for x_nonnegative: Q.Rational.Le(Q.Rational.zero(), x)
+  for y_nonnegative: Q.Rational.Le(Q.Rational.zero(), y)
+  Q.Rational.Le(Q.Rational.zero(), Q.Rational.mul(x, y))
+
+law rational_add_nonnegative:
+  for x: Q.Rational
+  for y: Q.Rational
+  for x_nonnegative: Q.Rational.Le(Q.Rational.zero(), x)
+  for y_nonnegative: Q.Rational.Le(Q.Rational.zero(), y)
+  Q.Rational.Le(Q.Rational.zero(), Q.Rational.add(x, y))
+
 law rational_zero_ne_one:
   Q.Rational.Eq(Q.Rational.zero(), Q.Rational.one()) -> Empty
 
@@ -341,6 +359,28 @@ law rational_inverse_cancel:
   for x: Q.Rational
   for nonzero: Q.Rational.Eq(x, Q.Rational.zero()) -> Empty
   Q.Rational.Eq(Q.Rational.mul(x, Q.Rational.inverse(x)), Q.Rational.one())
+
+law rational_inverse_unique:
+  for x: Q.Rational
+  for u: Q.Rational
+  for v: Q.Rational
+  for xu: Q.Rational.Eq(Q.Rational.mul(x, u), Q.Rational.one())
+  for xv: Q.Rational.Eq(Q.Rational.mul(x, v), Q.Rational.one())
+  Q.Rational.Eq(u, v)
+
+law rational_inverse_respects_nonzero_equality:
+  for x: Q.Rational
+  for y: Q.Rational
+  for equality: Q.Rational.Eq(x, y)
+  for x_nonzero: Q.Rational.Eq(x, Q.Rational.zero()) -> Empty
+  for y_nonzero: Q.Rational.Eq(y, Q.Rational.zero()) -> Empty
+  Q.Rational.Eq(Q.Rational.inverse(x), Q.Rational.inverse(y))
+
+law rational_inverse_respects_equality:
+  for x: Q.Rational
+  for y: Q.Rational
+  for equality: Q.Rational.Eq(x, y)
+  Q.Rational.Eq(Q.Rational.inverse(x), Q.Rational.inverse(y))
 
 law rational_le_antisymmetric:
   for x: Q.Rational
@@ -416,8 +456,23 @@ law rational_dyadic_nonnegative:
   for n: Nat
   Q.Rational.Le(Q.Rational.zero(), Q.Rational.dyadic(n))
 
+law rational_dyadic_denominator_doubles:
+  for n: Nat
+  {Q.Rational.denominator(Q.Rational.dyadic(1n+n)) ==
+   Nat.add(Q.Rational.denominator(Q.Rational.dyadic(n)), Q.Rational.denominator(Q.Rational.dyadic(n))) : Nat}
+
 law real_zero_exists:
   R.Real
+
+law real_rational_embedding:
+  for rational: Q.Rational
+  R.Real
+
+law real_rational_embedding_respects_equality:
+  for a: Q.Rational
+  for b: Q.Rational
+  for equality: Q.Rational.Eq(a, b)
+  R.Real.Eq(R.Real.of_rational(a), R.Real.of_rational(b))
 
 law real_eq_reflexive:
   for x: R.Real

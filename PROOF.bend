@@ -53,6 +53,9 @@ def Laws.natural_add_commutative(a, b):
 def Laws.natural_add_associative(a, b, c):
   N.Natural.add_associative(a, b, c)
 
+def Laws.natural_double_add(n):
+  N.Natural.double_add(n)
+
 def Laws.natural_add_left_cancel(c, a, b, proof):
   N.Natural.add_left_cancel(c, a, b, proof)
 
@@ -149,6 +152,12 @@ def Laws.rational_le_reflexive(x):
 def Laws.rational_le_total(x, y):
   Q.Rational.le_total(x, y)
 
+def Laws.rational_mul_nonnegative(x, y, x_nonnegative, y_nonnegative):
+  Q.Rational.mul_nonnegative(x, y, x_nonnegative, y_nonnegative)
+
+def Laws.rational_add_nonnegative(x, y, x_nonnegative, y_nonnegative):
+  Q.Rational.add_nonnegative(x, y, x_nonnegative, y_nonnegative)
+
 def Laws.rational_zero_ne_one(proof):
   Q.Rational.zero_ne_one(proof)
 
@@ -178,6 +187,15 @@ def Laws.rational_add_mul_distributive(a, b, c):
 
 def Laws.rational_inverse_cancel(x, nonzero):
   Q.Rational.inverse_cancel(x, nonzero)
+
+def Laws.rational_inverse_unique(x, u, v, xu, xv):
+  Q.Rational.inverse_unique(x, u, v, xu, xv)
+
+def Laws.rational_inverse_respects_nonzero_equality(x, y, equality, x_nonzero, y_nonzero):
+  Q.Rational.inverse_respects_nonzero_eq(x, y, equality, x_nonzero, y_nonzero)
+
+def Laws.rational_inverse_respects_equality(x, y, equality):
+  Q.Rational.inverse_respects_eq(x, y, equality)
 
 def Laws.rational_le_antisymmetric(x, y, xy, yx):
   Q.Rational.le_antisymmetric(x, y, xy, yx)
@@ -224,8 +242,17 @@ def Laws.rational_mul_zero(x):
 def Laws.rational_dyadic_nonnegative(n):
   Q.Rational.dyadic_nonnegative(n)
 
+def Laws.rational_dyadic_denominator_doubles(n):
+  Q.Rational.dyadic_denominator_next(n)
+
 def Laws.real_zero_exists():
   R.Real.zero()
+
+def Laws.real_rational_embedding(rational):
+  R.Real.of_rational(rational)
+
+def Laws.real_rational_embedding_respects_equality(a, b, equality):
+  R.Real.of_rational_eq(a, b, equality)
 
 def Laws.real_eq_reflexive(x):
   R.Real.eq_reflexive(x)

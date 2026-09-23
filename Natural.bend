@@ -116,6 +116,32 @@ def Natural.add_successor(a: Nat, +b: Nat) -> {Nat.add(a, 1n+b) == 1n+Nat.add(a,
     case 1n+p:
       Equal.cong(Nat, Nat, z => 1n+z, Nat.add(p, 1n+b), 1n+Nat.add(p, b), Natural.add_successor(p, b))
 
+def Natural.double_add(n: Nat) -> {Nat.double(n) == Nat.add(n, n) : Nat}:
+  match n:
+    case 0n:
+      {==}
+    case 1n++p:
+      Equal.trans(Nat,
+        Nat.double(1n+p),
+        2n+Nat.add(p, p),
+        Nat.add(1n+p, 1n+p),
+        Equal.cong(Nat, Nat, z => 2n+z, Nat.double(p), Nat.add(p, p), Natural.double_add(p)),
+        Equal.sym(Nat,
+          Nat.add(1n+p, 1n+p), 2n+Nat.add(p, p),
+          Equal.cong(Nat, Nat, z => 1n+z,
+            Nat.add(p, 1n+p), 1n+Nat.add(p, p),
+            Natural.add_successor(p, p))))
+
+def Natural.successor_double(+p: Nat) -> {2n+Nat.double(p) == Nat.add(1n+p, 1n+p) : Nat}:
+  Equal.trans(Nat,
+    2n+Nat.double(p), 2n+Nat.add(p, p), Nat.add(1n+p, 1n+p),
+    Equal.cong(Nat, Nat, z => 2n+z, Nat.double(p), Nat.add(p, p), Natural.double_add(p)),
+    Equal.sym(Nat,
+      Nat.add(1n+p, 1n+p), 2n+Nat.add(p, p),
+      Equal.cong(Nat, Nat, z => 1n+z,
+        Nat.add(p, 1n+p), 1n+Nat.add(p, p),
+        Natural.add_successor(p, p))))
+
 def Natural.add_commutative(a: Nat, +b: Nat) -> {Nat.add(a, b) == Nat.add(b, a) : Nat}:
   match a:
     case 0n:
@@ -205,6 +231,21 @@ def Natural.add_middle_commute(+a: Nat, +b: Nat, +c: Nat, +d: Nat) -> {Nat.add(N
         Nat.add(Nat.add(a, c), Nat.add(b, d)),
         Nat.add(a, Nat.add(c, Nat.add(b, d))),
         Natural.add_associative(a, c, Nat.add(b, d)))))
+
+def Natural.add_last_swap(+a: Nat, +b: Nat, +c: Nat) -> {Nat.add(Nat.add(a, b), c) == Nat.add(Nat.add(a, c), b) : Nat}:
+  Equal.trans(Nat,
+    Nat.add(Nat.add(a, b), c),
+    Nat.add(a, Nat.add(b, c)),
+    Nat.add(Nat.add(a, c), b),
+    Natural.add_associative(a, b, c),
+    Equal.trans(Nat,
+      Nat.add(a, Nat.add(b, c)),
+      Nat.add(a, Nat.add(c, b)),
+      Nat.add(Nat.add(a, c), b),
+      Equal.cong(Nat, Nat, z => Nat.add(a, z), Nat.add(b, c), Nat.add(c, b), Natural.add_commutative(b, c)),
+      Equal.sym(Nat,
+        Nat.add(Nat.add(a, c), b), Nat.add(a, Nat.add(c, b)),
+        Natural.add_associative(a, c, b))))
 
 def Natural.add_four_balance(+a: Nat, +b: Nat, +c: Nat, +d: Nat) -> {Nat.add(Nat.add(a, c), Nat.add(b, d)) == Nat.add(Nat.add(b, c), Nat.add(a, d)) : Nat}:
   Equal.trans(Nat,
@@ -509,6 +550,57 @@ def Natural.le_mul_left(+a: Nat, +b: Nat, +c: Nat, proof: Natural.Le(a, b)) -> N
     Natural.le_mul_right(a, b, c, proof),
     Natural.mul_commutative(a, c),
     Natural.mul_commutative(b, c))
+
+def Natural.signed_mul_nonnegative_gap(+p: Nat, +n: Nat, +m: Nat, +gap: Nat,
+  nonnegative: Natural.Le(n, p)) ->
+  Natural.Le(
+    Nat.add(Nat.mul(p, m), Nat.mul(n, Nat.add(m, gap))),
+    Nat.add(Nat.mul(p, Nat.add(m, gap)), Nat.mul(n, m))):
+  +pm: Nat = Nat.mul(p, m)
+  +nm: Nat = Nat.mul(n, m)
+  +ng: Nat = Nat.mul(n, gap)
+  +pg: Nat = Nat.mul(p, gap)
+  +common: Nat = Nat.add(pm, nm)
+  +left: Nat = Nat.add(pm, Nat.mul(n, Nat.add(m, gap)))
+  +right: Nat = Nat.add(Nat.mul(p, Nat.add(m, gap)), nm)
+  Natural.le_congruent(Nat.add(common, ng), Nat.add(common, pg), left, right,
+    Natural.le_add_both_left(common, ng, pg, Natural.le_mul_right(n, p, gap, nonnegative)),
+    Equal.sym(Nat,
+      left, Nat.add(common, ng),
+      Equal.trans(Nat,
+        left, Nat.add(pm, Nat.add(nm, ng)), Nat.add(common, ng),
+        Equal.cong(Nat, Nat, z => Nat.add(pm, z),
+          Nat.mul(n, Nat.add(m, gap)), Nat.add(nm, ng),
+          Natural.mul_add_right(n, m, gap)),
+        Equal.sym(Nat,
+          Nat.add(common, ng), Nat.add(pm, Nat.add(nm, ng)),
+          Natural.add_associative(pm, nm, ng)))),
+    Equal.sym(Nat,
+      right, Nat.add(common, pg),
+      Equal.trans(Nat,
+        right, Nat.add(Nat.add(pm, pg), nm), Nat.add(common, pg),
+        Equal.cong(Nat, Nat, z => Nat.add(z, nm),
+          Nat.mul(p, Nat.add(m, gap)), Nat.add(pm, pg),
+          Natural.mul_add_right(p, m, gap)),
+        Natural.add_last_swap(pm, pg, nm))))
+
+def Natural.signed_mul_nonnegative_gap_substitute(+p: Nat, +n: Nat, +m: Nat, +q: Nat, +gap: Nat,
+  nonnegative: Natural.Le(n, p), equality: {Nat.add(m, gap) == q : Nat}) ->
+  Natural.Le(Nat.add(Nat.mul(p, m), Nat.mul(n, q)), Nat.add(Nat.mul(p, q), Nat.mul(n, m))):
+  %equality : Natural.Le(Nat.add(Nat.mul(p, m), Nat.mul(n, _)), Nat.add(Nat.mul(p, _), Nat.mul(n, m)))
+  Natural.signed_mul_nonnegative_gap(p, n, m, gap, nonnegative)
+
+def Natural.signed_mul_nonnegative_witness(+p: Nat, +n: Nat, +m: Nat, +q: Nat,
+  nonnegative: Natural.Le(n, p),
+  witness: Exists(Nat, gap => {Nat.add(m, gap) == q : Nat})) ->
+  Natural.Le(Nat.add(Nat.mul(p, m), Nat.mul(n, q)), Nat.add(Nat.mul(p, q), Nat.mul(n, m))):
+  (gap, equality) = witness
+  Natural.signed_mul_nonnegative_gap_substitute(p, n, m, q, gap, nonnegative, equality)
+
+def Natural.signed_mul_nonnegative(+p: Nat, +n: Nat, +q: Nat, +m: Nat,
+  pn: Natural.Le(n, p), mq: Natural.Le(m, q)) ->
+  Natural.Le(Nat.add(Nat.mul(p, m), Nat.mul(n, q)), Nat.add(Nat.mul(p, q), Nat.mul(n, m))):
+  Natural.signed_mul_nonnegative_witness(p, n, m, q, pn, Natural.le_gap(m, q, mq))
 
 def Natural.le_cross_scaled(+a: Nat, +b: Nat, +c: Nat, +d: Nat, +k: Nat, proof: Natural.Le(Nat.add(a, c), Nat.add(b, d))) -> Natural.Le(Nat.add(Nat.mul(a, k), Nat.mul(c, k)), Nat.add(Nat.mul(b, k), Nat.mul(d, k))):
   Natural.le_congruent(Nat.mul(Nat.add(a, c), k), Nat.mul(Nat.add(b, d), k),
@@ -910,6 +1002,18 @@ def Natural.mul_gap_one(+p: Nat, +n: Nat, +d: Nat, +gap: Nat, proof: {p == Nat.a
           Nat.mul(n, d), Nat.mul(gap, d), Nat.mul(n, d), Nat.mul(d, gap),
           {==}, Natural.mul_commutative(gap, d)),
         Natural.add_commutative(Nat.mul(n, d), Nat.mul(d, gap)))))
+
+def Natural.positive_gap_not_equal(+p: Nat, +n: Nat, +k: Nat,
+  gap: {p == Nat.add(n, 1n+k) : Nat}, equal: {p == n : Nat}) -> Empty:
+  Natural.successor_not_zero(k,
+    Natural.add_left_cancel(n, 1n+k, 0n,
+      Equal.trans(Nat,
+        Nat.add(n, 1n+k), p, Nat.add(n, 0n),
+        Equal.sym(Nat, p, Nat.add(n, 1n+k), gap),
+        Equal.trans(Nat,
+          p, n, Nat.add(n, 0n),
+          equal,
+          Equal.sym(Nat, Nat.add(n, 0n), n, Natural.add_zero(n))))))
 
 def Natural.le_mul_right_cancel_positive(+k: Nat, a: Nat, b: Nat, proof: Natural.Le(Nat.mul(a, 1n+k), Nat.mul(b, 1n+k))) -> Natural.Le(a, b):
   match a b:

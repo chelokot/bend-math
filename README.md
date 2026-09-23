@@ -17,7 +17,8 @@ cannot substitute for that model.
 
 `Real.bend` currently represents a rational-valued regular Cauchy sequence,
 with equality defined by two directed cross-precision bounds. Bend checks that
-zero is a valid real and that this equality is reflexive and symmetric.
+every rational has a constant real representation, equivalent rational
+representations give equivalent reals, and real equality is reflexive and symmetric.
 Transitivity, field operations, order, completeness, and compatibility with
 the rational quotient are still open work. The checked definitions alone do
 not license any theorem about square packing.
@@ -34,8 +35,8 @@ The next proof boundaries are:
    multiplication are associative and commutative, and addition respects
    cross-multiplication equality. Multiplication also respects equality, and
    both distributive laws are proved. A nonzero rational has a checked
-   multiplicative inverse. Compatibility of inversion with equivalent
-   representations and the multiplicative order laws remain open.
+   multiplicative inverse, including compatibility with equivalent
+   representations. Products of nonnegative rationals are nonnegative.
 2. Prove `Real.Eq` transitive and lift addition, multiplication, order and
    limits to Cauchy representations, with all operations respecting `Real.Eq`.
 3. Prove completeness and construct square roots with their defining laws.
