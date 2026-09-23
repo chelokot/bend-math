@@ -306,6 +306,15 @@ law rational_add_respects_equality:
   for y_equal: Q.Rational.Eq(y, y_replacement)
   Q.Rational.Eq(Q.Rational.add(x, y), Q.Rational.add(x_replacement, y_replacement))
 
+law rational_mul_respects_equality:
+  for x: Q.Rational
+  for x_replacement: Q.Rational
+  for y: Q.Rational
+  for y_replacement: Q.Rational
+  for x_equal: Q.Rational.Eq(x, x_replacement)
+  for y_equal: Q.Rational.Eq(y, y_replacement)
+  Q.Rational.Eq(Q.Rational.mul(x, y), Q.Rational.mul(x_replacement, y_replacement))
+
 law rational_le_antisymmetric:
   for x: Q.Rational
   for y: Q.Rational

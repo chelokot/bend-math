@@ -91,6 +91,21 @@ def Rational.denominator_product_associative(+a: Nat, +b: Nat, +c: Nat) ->
               Nat.mul(1n+a, 1n+bc),
               Rational.denominator_product_spec(a, bc)))))))
 
+def Rational.cross_denominator_to_product(+p: Nat, +q: Nat, +a: Nat, +b: Nat, +z: Nat) ->
+  {Nat.add(Nat.mul(p, 1n+Rational.denominator_product(a, z)), Nat.mul(q, 1n+Rational.denominator_product(b, z))) ==
+   Nat.add(Nat.mul(p, Nat.mul(1n+a, 1n+z)), Nat.mul(q, Nat.mul(1n+b, 1n+z))) : Nat}:
+  N.Natural.eq_add_congruent(
+    Nat.mul(p, 1n+Rational.denominator_product(a, z)),
+    Nat.mul(q, 1n+Rational.denominator_product(b, z)),
+    Nat.mul(p, Nat.mul(1n+a, 1n+z)),
+    Nat.mul(q, Nat.mul(1n+b, 1n+z)),
+    Equal.cong(Nat, Nat, v => Nat.mul(p, v),
+      1n+Rational.denominator_product(a, z), Nat.mul(1n+a, 1n+z),
+      Rational.denominator_product_spec(a, z)),
+    Equal.cong(Nat, Nat, v => Nat.mul(q, v),
+      1n+Rational.denominator_product(b, z), Nat.mul(1n+b, 1n+z),
+      Rational.denominator_product_spec(b, z)))
+
 def Rational.fraction_congruent(+ap: Nat, +an: Nat, +ad: Nat, +bp: Nat, +bn: Nat, +bd: Nat,
   ep: {ap == bp : Nat}, en: {an == bn : Nat}, ed: {ad == bd : Nat}) ->
   {Fraction{ap, an, ad} == Fraction{bp, bn, bd} : Rational}:
@@ -569,6 +584,64 @@ def Rational.eq_add_both(+x: Rational, +x_replacement: Rational, +y: Rational, +
     Rational.add(x, y), Rational.add(x_replacement, y), Rational.add(x_replacement, y_replacement),
     Rational.eq_add_right(x, x_replacement, y, x_equal),
     Rational.eq_add_left(y, y_replacement, x_replacement, y_equal))
+
+def Rational.eq_mul_right_core(
+  +xp: Nat, +xn: Nat, +xd: Nat,
+  +yp: Nat, +yn: Nat, +yd: Nat,
+  +zp: Nat, +zn: Nat, +zd: Nat,
+  xy: {Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd)) ==
+       Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd)) : Nat}) ->
+  Rational.Eq(
+    Rational.mul(Fraction{xp, xn, xd}, Fraction{zp, zn, zd}),
+    Rational.mul(Fraction{yp, yn, yd}, Fraction{zp, zn, zd})):
+  +dx: Nat = 1n+xd
+  +dy: Nat = 1n+yd
+  +dz: Nat = 1n+zd
+  +pxz: Nat = Nat.add(Nat.mul(xp, zp), Nat.mul(xn, zn))
+  +nxz: Nat = Nat.add(Nat.mul(xp, zn), Nat.mul(xn, zp))
+  +pyz: Nat = Nat.add(Nat.mul(yp, zp), Nat.mul(yn, zn))
+  +nyz: Nat = Nat.add(Nat.mul(yp, zn), Nat.mul(yn, zp))
+  +actual_left: Nat = Nat.add(Nat.mul(pxz, 1n+Rational.denominator_product(yd, zd)), Nat.mul(nyz, 1n+Rational.denominator_product(xd, zd)))
+  +actual_right: Nat = Nat.add(Nat.mul(pyz, 1n+Rational.denominator_product(xd, zd)), Nat.mul(nxz, 1n+Rational.denominator_product(yd, zd)))
+  +ideal_left: Nat = Nat.add(Nat.mul(pxz, Nat.mul(dy, dz)), Nat.mul(nyz, Nat.mul(dx, dz)))
+  +ideal_right: Nat = Nat.add(Nat.mul(pyz, Nat.mul(dx, dz)), Nat.mul(nxz, Nat.mul(dy, dz)))
+  +inner_left: Nat = Nat.add(Nat.mul(pxz, dy), Nat.mul(nyz, dx))
+  +inner_right: Nat = Nat.add(Nat.mul(pyz, dx), Nat.mul(nxz, dy))
+  Equal.trans(Nat,
+    actual_left, ideal_left, actual_right,
+    Rational.cross_denominator_to_product(pxz, nyz, yd, xd, zd),
+    Equal.trans(Nat,
+      ideal_left, Nat.mul(inner_left, dz), actual_right,
+      N.Natural.sum_mul_associative(pxz, dy, nyz, dx, dz),
+      Equal.trans(Nat,
+        Nat.mul(inner_left, dz), Nat.mul(inner_right, dz), actual_right,
+        Equal.cong(Nat, Nat, v => Nat.mul(v, dz), inner_left, inner_right,
+          N.Natural.cross_mul_respects_eq(xp, xn, yp, yn, dy, dx, zp, zn, xy)),
+        Equal.trans(Nat,
+          Nat.mul(inner_right, dz), ideal_right, actual_right,
+          Equal.sym(Nat, ideal_right, Nat.mul(inner_right, dz),
+            N.Natural.sum_mul_associative(pyz, dx, nxz, dy, dz)),
+          Equal.sym(Nat, actual_right, ideal_right,
+            Rational.cross_denominator_to_product(pyz, nxz, xd, yd, zd))))))
+
+def Rational.eq_mul_right(+x: Rational, +y: Rational, +z: Rational, equality: Rational.Eq(x, y)) -> Rational.Eq(Rational.mul(x, z), Rational.mul(y, z)):
+  match x y z:
+    case Fraction{xp, xn, xd} Fraction{yp, yn, yd} Fraction{zp, zn, zd}:
+      Rational.eq_mul_right_core(xp, xn, xd, yp, yn, yd, zp, zn, zd, equality)
+
+def Rational.eq_mul_left(+x: Rational, +y: Rational, +z: Rational, equality: Rational.Eq(x, y)) -> Rational.Eq(Rational.mul(z, x), Rational.mul(z, y)):
+  Rational.eq_structural_congruent(
+    Rational.mul(x, z), Rational.mul(y, z), Rational.mul(z, x), Rational.mul(z, y),
+    Rational.eq_mul_right(x, y, z, equality),
+    Rational.mul_commutative(x, z), Rational.mul_commutative(y, z))
+
+def Rational.eq_mul_both(+x: Rational, +x_replacement: Rational, +y: Rational, +y_replacement: Rational,
+  x_equal: Rational.Eq(x, x_replacement), y_equal: Rational.Eq(y, y_replacement)) ->
+  Rational.Eq(Rational.mul(x, y), Rational.mul(x_replacement, y_replacement)):
+  Rational.eq_transitive(
+    Rational.mul(x, y), Rational.mul(x_replacement, y), Rational.mul(x_replacement, y_replacement),
+    Rational.eq_mul_right(x, x_replacement, y, x_equal),
+    Rational.eq_mul_left(y, y_replacement, x_replacement, y_equal))
 
 def Rational.two_power_predecessor(n: Nat) -> Nat:
   match n:

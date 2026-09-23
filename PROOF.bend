@@ -161,6 +161,9 @@ def Laws.rational_le_add_right(x, y, z, xy):
 def Laws.rational_add_respects_equality(x, x_replacement, y, y_replacement, x_equal, y_equal):
   Q.Rational.eq_add_both(x, x_replacement, y, y_replacement, x_equal, y_equal)
 
+def Laws.rational_mul_respects_equality(x, x_replacement, y, y_replacement, x_equal, y_equal):
+  Q.Rational.eq_mul_both(x, x_replacement, y, y_replacement, x_equal, y_equal)
+
 def Laws.rational_le_antisymmetric(x, y, xy, yx):
   Q.Rational.le_antisymmetric(x, y, xy, yx)
 
