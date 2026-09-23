@@ -17,6 +17,18 @@ def Laws.natural_add_zero(n):
 def Laws.natural_add_commutative(a, b):
   N.Natural.add_commutative(a, b)
 
+def Laws.natural_add_associative(a, b, c):
+  N.Natural.add_associative(a, b, c)
+
+def Laws.natural_mul_zero(n):
+  N.Natural.mul_zero(n)
+
+def Laws.natural_mul_one(n):
+  N.Natural.mul_one(n)
+
+def Laws.natural_one_mul(n):
+  N.Natural.one_mul(n)
+
 def Laws.integer_neg_involutive(x):
   Z.Integer.neg_involutive(x)
 

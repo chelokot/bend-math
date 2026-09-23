@@ -66,3 +66,27 @@ def Natural.add_commutative(a: Nat, +b: Nat) -> {Nat.add(a, b) == Nat.add(b, a) 
       Equal.trans(Nat, 1n+Nat.add(p, b), 1n+Nat.add(b, p), Nat.add(b, 1n+p),
         Equal.cong(Nat, Nat, z => 1n+z, Nat.add(p, b), Nat.add(b, p), Natural.add_commutative(p, b)),
         Equal.sym(Nat, Nat.add(b, 1n+p), 1n+Nat.add(b, p), Natural.add_successor(b, p)))
+
+def Natural.add_associative(a: Nat, +b: Nat, +c: Nat) -> {Nat.add(Nat.add(a, b), c) == Nat.add(a, Nat.add(b, c)) : Nat}:
+  match a:
+    case 0n:
+      {==}
+    case 1n+p:
+      Equal.cong(Nat, Nat, z => 1n+z, Nat.add(Nat.add(p, b), c), Nat.add(p, Nat.add(b, c)), Natural.add_associative(p, b, c))
+
+def Natural.mul_zero(n: Nat) -> {Nat.mul(n, 0n) == 0n : Nat}:
+  match n:
+    case 0n:
+      {==}
+    case 1n+p:
+      Natural.mul_zero(p)
+
+def Natural.mul_one(n: Nat) -> {Nat.mul(n, 1n) == n : Nat}:
+  match n:
+    case 0n:
+      {==}
+    case 1n+p:
+      Equal.cong(Nat, Nat, z => 1n+z, Nat.mul(p, 1n), p, Natural.mul_one(p))
+
+def Natural.one_mul(n: Nat) -> {Nat.mul(1n, n) == n : Nat}:
+  Natural.add_zero(n)

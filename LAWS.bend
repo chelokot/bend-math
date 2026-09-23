@@ -25,6 +25,24 @@ law natural_add_commutative:
   for b: Nat
   {Nat.add(a, b) == Nat.add(b, a) : Nat}
 
+law natural_add_associative:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  {Nat.add(Nat.add(a, b), c) == Nat.add(a, Nat.add(b, c)) : Nat}
+
+law natural_mul_zero:
+  for n: Nat
+  {Nat.mul(n, 0n) == 0n : Nat}
+
+law natural_mul_one:
+  for n: Nat
+  {Nat.mul(n, 1n) == n : Nat}
+
+law natural_one_mul:
+  for n: Nat
+  {Nat.mul(1n, n) == n : Nat}
+
 law integer_neg_involutive:
   for x: Z.Integer
   {Z.Integer.neg(Z.Integer.neg(x)) == x : Z.Integer}
