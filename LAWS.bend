@@ -23,6 +23,59 @@ law natural_le_antisymmetric:
   for ba: N.Natural.Le(b, a)
   {a == b : Nat}
 
+law natural_le_has_gap:
+  for a: Nat
+  for b: Nat
+  for proof: N.Natural.Le(a, b)
+  exs gap: Nat
+  {Nat.add(a, gap) == b : Nat}
+
+law natural_le_from_gap:
+  for a: Nat
+  for b: Nat
+  for gap: Nat
+  for equality: {Nat.add(a, gap) == b : Nat}
+  N.Natural.Le(a, b)
+
+law natural_le_mul_right:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  for proof: N.Natural.Le(a, b)
+  N.Natural.Le(Nat.mul(a, c), Nat.mul(b, c))
+
+law natural_le_mul_left:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  for proof: N.Natural.Le(a, b)
+  N.Natural.Le(Nat.mul(c, a), Nat.mul(c, b))
+
+law natural_le_mul_right_cancel_positive:
+  for k: Nat
+  for a: Nat
+  for b: Nat
+  for proof: N.Natural.Le(Nat.mul(a, 1n+k), Nat.mul(b, 1n+k))
+  N.Natural.Le(a, b)
+
+law natural_le_mul_left_cancel_positive:
+  for k: Nat
+  for a: Nat
+  for b: Nat
+  for proof: N.Natural.Le(Nat.mul(1n+k, a), Nat.mul(1n+k, b))
+  N.Natural.Le(a, b)
+
+law natural_le_balance:
+  for a: Nat
+  for b: Nat
+  for c: Nat
+  for d: Nat
+  for e: Nat
+  for f: Nat
+  for first: N.Natural.Le(Nat.add(a, c), Nat.add(b, d))
+  for second: N.Natural.Le(Nat.add(b, e), Nat.add(c, f))
+  N.Natural.Le(Nat.add(a, e), Nat.add(d, f))
+
 law natural_le_add_right:
   for a: Nat
   for b: Nat
@@ -184,6 +237,14 @@ law rational_eq_symmetric:
   for proof: Q.Rational.Eq(x, y)
   Q.Rational.Eq(y, x)
 
+law rational_eq_transitive:
+  for x: Q.Rational
+  for y: Q.Rational
+  for z: Q.Rational
+  for xy: Q.Rational.Eq(x, y)
+  for yz: Q.Rational.Eq(y, z)
+  Q.Rational.Eq(x, z)
+
 law rational_neg_involutive:
   for x: Q.Rational
   {Q.Rational.neg(Q.Rational.neg(x)) == x : Q.Rational}
@@ -197,6 +258,14 @@ law rational_eq_negated:
 law rational_le_reflexive:
   for x: Q.Rational
   Q.Rational.Le(x, x)
+
+law rational_le_transitive:
+  for x: Q.Rational
+  for y: Q.Rational
+  for z: Q.Rational
+  for xy: Q.Rational.Le(x, y)
+  for yz: Q.Rational.Le(y, z)
+  Q.Rational.Le(x, z)
 
 law rational_le_antisymmetric:
   for x: Q.Rational

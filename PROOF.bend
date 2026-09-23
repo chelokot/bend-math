@@ -14,6 +14,27 @@ def Laws.natural_le_transitive(a, b, c, ab, bc):
 def Laws.natural_le_antisymmetric(a, b, ab, ba):
   N.Natural.le_antisymmetric(a, b, ab, ba)
 
+def Laws.natural_le_has_gap(a, b, proof):
+  N.Natural.le_gap(a, b, proof)
+
+def Laws.natural_le_from_gap(a, b, gap, equality):
+  N.Natural.le_from_gap(a, b, gap, equality)
+
+def Laws.natural_le_mul_right(a, b, c, proof):
+  N.Natural.le_mul_right(a, b, c, proof)
+
+def Laws.natural_le_mul_left(a, b, c, proof):
+  N.Natural.le_mul_left(a, b, c, proof)
+
+def Laws.natural_le_mul_right_cancel_positive(k, a, b, proof):
+  N.Natural.le_mul_right_cancel_positive(k, a, b, proof)
+
+def Laws.natural_le_mul_left_cancel_positive(k, a, b, proof):
+  N.Natural.le_mul_left_cancel_positive(k, a, b, proof)
+
+def Laws.natural_le_balance(a, b, c, d, e, f, first, second):
+  N.Natural.le_balance(a, b, c, d, e, f, first, second)
+
 def Laws.natural_le_add_right(a, b):
   N.Natural.le_add_right(a, b)
 
@@ -107,6 +128,9 @@ def Laws.rational_eq_reflexive(x):
 def Laws.rational_eq_symmetric(x, y, proof):
   Q.Rational.eq_symmetric(x, y, proof)
 
+def Laws.rational_eq_transitive(x, y, z, xy, yz):
+  Q.Rational.eq_transitive(x, y, z, xy, yz)
+
 def Laws.rational_neg_involutive(x):
   Q.Rational.neg_involutive(x)
 
@@ -115,6 +139,9 @@ def Laws.rational_eq_negated(x, y, proof):
 
 def Laws.rational_le_reflexive(x):
   Q.Rational.le_reflexive(x)
+
+def Laws.rational_le_transitive(x, y, z, xy, yz):
+  Q.Rational.le_transitive(x, y, z, xy, yz)
 
 def Laws.rational_le_antisymmetric(x, y, xy, yx):
   Q.Rational.le_antisymmetric(x, y, xy, yx)

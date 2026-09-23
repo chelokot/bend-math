@@ -122,6 +122,98 @@ def Rational.le_negated(+x: Rational, +y: Rational, proof: Rational.Le(x, y)) ->
         N.Natural.add_commutative(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd)),
         N.Natural.add_commutative(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd)))
 
+def Rational.le_transitive_core(
+  +xp: Nat, +xn: Nat, +xd: Nat,
+  +yp: Nat, +yn: Nat, +yd: Nat,
+  +zp: Nat, +zn: Nat, +zd: Nat,
+  xy: N.Natural.Le(
+    Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd)),
+    Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd))),
+  yz: N.Natural.Le(
+    Nat.add(Nat.mul(yp, 1n+zd), Nat.mul(zn, 1n+yd)),
+    Nat.add(Nat.mul(zp, 1n+yd), Nat.mul(yn, 1n+zd)))) ->
+  N.Natural.Le(
+    Nat.add(Nat.mul(xp, 1n+zd), Nat.mul(zn, 1n+xd)),
+    Nat.add(Nat.mul(zp, 1n+xd), Nat.mul(xn, 1n+zd))):
+  +dx: Nat = 1n+xd
+  +dy: Nat = 1n+yd
+  +dz: Nat = 1n+zd
+  +a = Nat.mul(Nat.mul(xp, dy), dz)
+  +b = Nat.mul(Nat.mul(yp, dx), dz)
+  +c = Nat.mul(Nat.mul(yn, dx), dz)
+  +d = Nat.mul(Nat.mul(xn, dy), dz)
+  +e = Nat.mul(Nat.mul(zn, dy), dx)
+  +f = Nat.mul(Nat.mul(zp, dy), dx)
+  first = N.Natural.le_cross_scaled(Nat.mul(xp, dy), Nat.mul(yp, dx), Nat.mul(yn, dx), Nat.mul(xn, dy), dz, xy)
+  second_scaled = N.Natural.le_cross_scaled(Nat.mul(yp, dz), Nat.mul(zp, dy), Nat.mul(zn, dy), Nat.mul(yn, dz), dx, yz)
+  second = N.Natural.le_congruent(
+    Nat.add(Nat.mul(Nat.mul(yp, dz), dx), e),
+    Nat.add(f, Nat.mul(Nat.mul(yn, dz), dx)),
+    Nat.add(b, e), Nat.add(c, f), second_scaled,
+    N.Natural.eq_add_congruent(
+      Nat.mul(Nat.mul(yp, dz), dx), e, b, e,
+      N.Natural.mul_last_swap(yp, dz, dx), {==}),
+    Equal.trans(Nat,
+      Nat.add(f, Nat.mul(Nat.mul(yn, dz), dx)),
+      Nat.add(f, c), Nat.add(c, f),
+      N.Natural.eq_add_congruent(f, Nat.mul(Nat.mul(yn, dz), dx), f, c,
+        {==}, N.Natural.mul_last_swap(yn, dz, dx)),
+      N.Natural.add_commutative(f, c)))
+  balanced = N.Natural.le_balance(a, b, c, d, e, f, first, second)
+  +left = Nat.add(Nat.mul(xp, dz), Nat.mul(zn, dx))
+  +right = Nat.add(Nat.mul(zp, dx), Nat.mul(xn, dz))
+  left_scaled = Equal.trans(Nat,
+    Nat.add(a, e),
+    Nat.add(Nat.mul(Nat.mul(xp, dz), dy), Nat.mul(Nat.mul(zn, dx), dy)),
+    Nat.mul(left, dy),
+    N.Natural.eq_add_congruent(a, e,
+      Nat.mul(Nat.mul(xp, dz), dy), Nat.mul(Nat.mul(zn, dx), dy),
+      N.Natural.mul_last_swap(xp, dy, dz),
+      N.Natural.mul_last_swap(zn, dy, dx)),
+    Equal.sym(Nat,
+      Nat.mul(left, dy),
+      Nat.add(Nat.mul(Nat.mul(xp, dz), dy), Nat.mul(Nat.mul(zn, dx), dy)),
+      N.Natural.mul_add_left(Nat.mul(xp, dz), Nat.mul(zn, dx), dy)))
+  right_scaled = Equal.trans(Nat,
+    Nat.add(d, f),
+    Nat.add(Nat.mul(Nat.mul(xn, dz), dy), Nat.mul(Nat.mul(zp, dx), dy)),
+    Nat.mul(right, dy),
+    N.Natural.eq_add_congruent(d, f,
+      Nat.mul(Nat.mul(xn, dz), dy), Nat.mul(Nat.mul(zp, dx), dy),
+      N.Natural.mul_last_swap(xn, dy, dz),
+      N.Natural.mul_last_swap(zp, dy, dx)),
+    Equal.trans(Nat,
+      Nat.add(Nat.mul(Nat.mul(xn, dz), dy), Nat.mul(Nat.mul(zp, dx), dy)),
+      Nat.add(Nat.mul(Nat.mul(zp, dx), dy), Nat.mul(Nat.mul(xn, dz), dy)),
+      Nat.mul(right, dy),
+      N.Natural.add_commutative(Nat.mul(Nat.mul(xn, dz), dy), Nat.mul(Nat.mul(zp, dx), dy)),
+      Equal.sym(Nat,
+        Nat.mul(right, dy),
+        Nat.add(Nat.mul(Nat.mul(zp, dx), dy), Nat.mul(Nat.mul(xn, dz), dy)),
+        N.Natural.mul_add_left(Nat.mul(zp, dx), Nat.mul(xn, dz), dy))))
+  N.Natural.le_mul_right_cancel_positive(yd, left, right,
+    N.Natural.le_congruent(Nat.add(a, e), Nat.add(d, f), Nat.mul(left, dy), Nat.mul(right, dy), balanced, left_scaled, right_scaled))
+
+def Rational.le_transitive(+x: Rational, +y: Rational, +z: Rational, xy: Rational.Le(x, y), yz: Rational.Le(y, z)) -> Rational.Le(x, z):
+  match x y z:
+    case Fraction{xp, xn, xd} Fraction{yp, yn, yd} Fraction{zp, zn, zd}:
+      Rational.le_transitive_core(xp, xn, xd, yp, yn, yd, zp, zn, zd, xy, yz)
+
+def Rational.eq_both_le(+x: Rational, +y: Rational, equality: Rational.Eq(x, y)) -> Rational.Le(x, y) & Rational.Le(y, x):
+  N.Natural.le_both_from_eq(Rational.left_cross(x, y), Rational.right_cross(x, y), equality)
+
+def Rational.eq_transitive_bounds(+x: Rational, +y: Rational, +z: Rational,
+  xy_bounds: Rational.Le(x, y) & Rational.Le(y, x),
+  yz_bounds: Rational.Le(y, z) & Rational.Le(z, y)) -> Rational.Eq(x, z):
+  (xy_forward, xy_backward) = xy_bounds
+  (yz_forward, yz_backward) = yz_bounds
+  Rational.le_antisymmetric(x, z,
+    Rational.le_transitive(x, y, z, xy_forward, yz_forward),
+    Rational.le_transitive(z, y, x, yz_backward, xy_backward))
+
+def Rational.eq_transitive(+x: Rational, +y: Rational, +z: Rational, xy: Rational.Eq(x, y), yz: Rational.Eq(y, z)) -> Rational.Eq(x, z):
+  Rational.eq_transitive_bounds(x, y, z, Rational.eq_both_le(x, y, xy), Rational.eq_both_le(y, z, yz))
+
 def Rational.two_power_predecessor(n: Nat) -> Nat:
   match n:
     case 0n:
