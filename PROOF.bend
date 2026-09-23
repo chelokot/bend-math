@@ -167,8 +167,14 @@ def Laws.rational_denominator_product(a, b):
 def Laws.rational_add_commutative(a, b):
   Q.Rational.add_commutative(a, b)
 
+def Laws.rational_add_associative(a, b, c):
+  Q.Rational.add_associative(a, b, c)
+
 def Laws.rational_mul_commutative(a, b):
   Q.Rational.mul_commutative(a, b)
+
+def Laws.rational_mul_associative(a, b, c):
+  Q.Rational.mul_associative(a, b, c)
 
 def Laws.rational_add_zero(x):
   Q.Rational.add_zero(x)

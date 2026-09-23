@@ -59,6 +59,38 @@ def Rational.denominator_product_commutative(+a: Nat, +b: Nat) -> {Rational.deno
           Nat.mul(1n+b, 1n+a),
           Rational.denominator_product_spec(b, a)))))
 
+def Rational.denominator_product_associative(+a: Nat, +b: Nat, +c: Nat) ->
+  {Rational.denominator_product(Rational.denominator_product(a, b), c) ==
+   Rational.denominator_product(a, Rational.denominator_product(b, c)) : Nat}:
+  +ab: Nat = Rational.denominator_product(a, b)
+  +bc: Nat = Rational.denominator_product(b, c)
+  N.Natural.successor_injective(Rational.denominator_product(ab, c), Rational.denominator_product(a, bc),
+    Equal.trans(Nat,
+      1n+Rational.denominator_product(ab, c),
+      Nat.mul(1n+ab, 1n+c),
+      1n+Rational.denominator_product(a, bc),
+      Rational.denominator_product_spec(ab, c),
+      Equal.trans(Nat,
+        Nat.mul(1n+ab, 1n+c),
+        Nat.mul(Nat.mul(1n+a, 1n+b), 1n+c),
+        1n+Rational.denominator_product(a, bc),
+        Equal.cong(Nat, Nat, z => Nat.mul(z, 1n+c), 1n+ab, Nat.mul(1n+a, 1n+b), Rational.denominator_product_spec(a, b)),
+        Equal.trans(Nat,
+          Nat.mul(Nat.mul(1n+a, 1n+b), 1n+c),
+          Nat.mul(1n+a, Nat.mul(1n+b, 1n+c)),
+          1n+Rational.denominator_product(a, bc),
+          N.Natural.mul_associative(1n+a, 1n+b, 1n+c),
+          Equal.trans(Nat,
+            Nat.mul(1n+a, Nat.mul(1n+b, 1n+c)),
+            Nat.mul(1n+a, 1n+bc),
+            1n+Rational.denominator_product(a, bc),
+            Equal.cong(Nat, Nat, z => Nat.mul(1n+a, z), Nat.mul(1n+b, 1n+c), 1n+bc,
+              Equal.sym(Nat, 1n+bc, Nat.mul(1n+b, 1n+c), Rational.denominator_product_spec(b, c))),
+            Equal.sym(Nat,
+              1n+Rational.denominator_product(a, bc),
+              Nat.mul(1n+a, 1n+bc),
+              Rational.denominator_product_spec(a, bc)))))))
+
 def Rational.fraction_congruent(+ap: Nat, +an: Nat, +ad: Nat, +bp: Nat, +bn: Nat, +bd: Nat,
   ep: {ap == bp : Nat}, en: {an == bn : Nat}, ed: {ad == bd : Nat}) ->
   {Fraction{ap, an, ad} == Fraction{bp, bn, bd} : Rational}:
@@ -92,6 +124,50 @@ def Rational.add_commutative(a: Rational, b: Rational) -> {Rational.add(a, b) ==
         N.Natural.add_commutative(Nat.mul(ap, 1n+bd), Nat.mul(bp, 1n+ad)),
         N.Natural.add_commutative(Nat.mul(an, 1n+bd), Nat.mul(bn, 1n+ad)),
         Rational.denominator_product_commutative(ad, bd))
+
+def Rational.add_associative_numerator(+a: Nat, +b: Nat, +c: Nat, +ad: Nat, +bd: Nat, +cd: Nat) ->
+  {Nat.add(
+     Nat.mul(Nat.add(Nat.mul(a, 1n+bd), Nat.mul(b, 1n+ad)), 1n+cd),
+     Nat.mul(c, 1n+Rational.denominator_product(ad, bd))) ==
+   Nat.add(
+     Nat.mul(a, 1n+Rational.denominator_product(bd, cd)),
+     Nat.mul(Nat.add(Nat.mul(b, 1n+cd), Nat.mul(c, 1n+bd)), 1n+ad)) : Nat}:
+  +da: Nat = 1n+ad
+  +db: Nat = 1n+bd
+  +dc: Nat = 1n+cd
+  +ab: Nat = Nat.add(Nat.mul(a, db), Nat.mul(b, da))
+  +bc: Nat = Nat.add(Nat.mul(b, dc), Nat.mul(c, db))
+  Equal.trans(Nat,
+    Nat.add(Nat.mul(ab, dc), Nat.mul(c, 1n+Rational.denominator_product(ad, bd))),
+    Nat.add(Nat.mul(ab, dc), Nat.mul(c, Nat.mul(da, db))),
+    Nat.add(Nat.mul(a, 1n+Rational.denominator_product(bd, cd)), Nat.mul(bc, da)),
+    Equal.cong(Nat, Nat, z => Nat.add(Nat.mul(ab, dc), Nat.mul(c, z)),
+      1n+Rational.denominator_product(ad, bd), Nat.mul(da, db),
+      Rational.denominator_product_spec(ad, bd)),
+    Equal.trans(Nat,
+      Nat.add(Nat.mul(ab, dc), Nat.mul(c, Nat.mul(da, db))),
+      Nat.add(Nat.mul(a, Nat.mul(db, dc)), Nat.mul(bc, da)),
+      Nat.add(Nat.mul(a, 1n+Rational.denominator_product(bd, cd)), Nat.mul(bc, da)),
+      N.Natural.fraction_sum_associative(a, b, c, da, db, dc),
+      Equal.cong(Nat, Nat, z => Nat.add(Nat.mul(a, z), Nat.mul(bc, da)),
+        Nat.mul(db, dc), 1n+Rational.denominator_product(bd, cd),
+        Equal.sym(Nat,
+          1n+Rational.denominator_product(bd, cd), Nat.mul(db, dc),
+          Rational.denominator_product_spec(bd, cd)))))
+
+def Rational.add_associative(a: Rational, b: Rational, c: Rational) -> {Rational.add(Rational.add(a, b), c) == Rational.add(a, Rational.add(b, c)) : Rational}:
+  match a b c:
+    case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd} Fraction{+cp, +cn, +cd}:
+      Rational.fraction_congruent(
+        Nat.add(Nat.mul(Nat.add(Nat.mul(ap, 1n+bd), Nat.mul(bp, 1n+ad)), 1n+cd), Nat.mul(cp, 1n+Rational.denominator_product(ad, bd))),
+        Nat.add(Nat.mul(Nat.add(Nat.mul(an, 1n+bd), Nat.mul(bn, 1n+ad)), 1n+cd), Nat.mul(cn, 1n+Rational.denominator_product(ad, bd))),
+        Rational.denominator_product(Rational.denominator_product(ad, bd), cd),
+        Nat.add(Nat.mul(ap, 1n+Rational.denominator_product(bd, cd)), Nat.mul(Nat.add(Nat.mul(bp, 1n+cd), Nat.mul(cp, 1n+bd)), 1n+ad)),
+        Nat.add(Nat.mul(an, 1n+Rational.denominator_product(bd, cd)), Nat.mul(Nat.add(Nat.mul(bn, 1n+cd), Nat.mul(cn, 1n+bd)), 1n+ad)),
+        Rational.denominator_product(ad, Rational.denominator_product(bd, cd)),
+        Rational.add_associative_numerator(ap, bp, cp, ad, bd, cd),
+        Rational.add_associative_numerator(an, bn, cn, ad, bd, cd),
+        Rational.denominator_product_associative(ad, bd, cd))
 
 def Rational.add_zero(x: Rational) -> {Rational.add(x, Rational.zero()) == x : Rational}:
   match x:
@@ -159,6 +235,28 @@ def Rational.mul_commutative(a: Rational, b: Rational) -> {Rational.mul(a, b) ==
             N.Natural.mul_commutative(ap, bn), N.Natural.mul_commutative(an, bp)),
           N.Natural.add_commutative(Nat.mul(bn, ap), Nat.mul(bp, an))),
         Rational.denominator_product_commutative(ad, bd))
+
+def Rational.mul_associative(a: Rational, b: Rational, c: Rational) -> {Rational.mul(Rational.mul(a, b), c) == Rational.mul(a, Rational.mul(b, c)) : Rational}:
+  match a b c:
+    case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd} Fraction{+cp, +cn, +cd}:
+      Rational.fraction_congruent(
+        Nat.add(
+          Nat.mul(Nat.add(Nat.mul(ap, bp), Nat.mul(an, bn)), cp),
+          Nat.mul(Nat.add(Nat.mul(ap, bn), Nat.mul(an, bp)), cn)),
+        Nat.add(
+          Nat.mul(Nat.add(Nat.mul(ap, bp), Nat.mul(an, bn)), cn),
+          Nat.mul(Nat.add(Nat.mul(ap, bn), Nat.mul(an, bp)), cp)),
+        Rational.denominator_product(Rational.denominator_product(ad, bd), cd),
+        Nat.add(
+          Nat.mul(ap, Nat.add(Nat.mul(bp, cp), Nat.mul(bn, cn))),
+          Nat.mul(an, Nat.add(Nat.mul(bp, cn), Nat.mul(bn, cp)))),
+        Nat.add(
+          Nat.mul(ap, Nat.add(Nat.mul(bp, cn), Nat.mul(bn, cp))),
+          Nat.mul(an, Nat.add(Nat.mul(bp, cp), Nat.mul(bn, cn)))),
+        Rational.denominator_product(ad, Rational.denominator_product(bd, cd)),
+        N.Natural.signed_product_associative(ap, an, bp, bn, cp, cn),
+        N.Natural.signed_product_associative(ap, an, bp, bn, cn, cp),
+        Rational.denominator_product_associative(ad, bd, cd))
 
 def Rational.mul_one(x: Rational) -> {Rational.mul(x, Rational.one()) == x : Rational}:
   match x:

@@ -309,10 +309,22 @@ law rational_add_commutative:
   for b: Q.Rational
   {Q.Rational.add(a, b) == Q.Rational.add(b, a) : Q.Rational}
 
+law rational_add_associative:
+  for a: Q.Rational
+  for b: Q.Rational
+  for c: Q.Rational
+  {Q.Rational.add(Q.Rational.add(a, b), c) == Q.Rational.add(a, Q.Rational.add(b, c)) : Q.Rational}
+
 law rational_mul_commutative:
   for a: Q.Rational
   for b: Q.Rational
   {Q.Rational.mul(a, b) == Q.Rational.mul(b, a) : Q.Rational}
+
+law rational_mul_associative:
+  for a: Q.Rational
+  for b: Q.Rational
+  for c: Q.Rational
+  {Q.Rational.mul(Q.Rational.mul(a, b), c) == Q.Rational.mul(a, Q.Rational.mul(b, c)) : Q.Rational}
 
 law rational_add_zero:
   for x: Q.Rational
