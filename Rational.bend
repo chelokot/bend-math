@@ -458,6 +458,23 @@ def Rational.eq_transitive_bounds(+x: Rational, +y: Rational, +z: Rational,
 def Rational.eq_transitive(+x: Rational, +y: Rational, +z: Rational, xy: Rational.Eq(x, y), yz: Rational.Eq(y, z)) -> Rational.Eq(x, z):
   Rational.eq_transitive_bounds(x, y, z, Rational.eq_both_le(x, y, xy), Rational.eq_both_le(y, z, yz))
 
+def Rational.le_replace_bounds(+x: Rational, +x_replacement: Rational, +y: Rational, +y_replacement: Rational,
+  x_bounds: Rational.Le(x, x_replacement) & Rational.Le(x_replacement, x),
+  y_bounds: Rational.Le(y, y_replacement) & Rational.Le(y_replacement, y),
+  xy: Rational.Le(x, y)) -> Rational.Le(x_replacement, y_replacement):
+  (x_forward, x_backward) = x_bounds
+  (y_forward, y_backward) = y_bounds
+  Rational.le_transitive(x_replacement, x, y_replacement, x_backward,
+    Rational.le_transitive(x, y, y_replacement, xy, y_forward))
+
+def Rational.le_replace(+x: Rational, +x_replacement: Rational, +y: Rational, +y_replacement: Rational,
+  x_equal: Rational.Eq(x, x_replacement),
+  y_equal: Rational.Eq(y, y_replacement),
+  xy: Rational.Le(x, y)) -> Rational.Le(x_replacement, y_replacement):
+  Rational.le_replace_bounds(x, x_replacement, y, y_replacement,
+    Rational.eq_both_le(x, x_replacement, x_equal),
+    Rational.eq_both_le(y, y_replacement, y_equal), xy)
+
 def Rational.two_power_predecessor(n: Nat) -> Nat:
   match n:
     case 0n:

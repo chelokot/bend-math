@@ -152,6 +152,9 @@ def Laws.rational_zero_ne_one(proof):
 def Laws.rational_le_transitive(x, y, z, xy, yz):
   Q.Rational.le_transitive(x, y, z, xy, yz)
 
+def Laws.rational_le_respects_equality(x, x_replacement, y, y_replacement, x_equal, y_equal, xy):
+  Q.Rational.le_replace(x, x_replacement, y, y_replacement, x_equal, y_equal, xy)
+
 def Laws.rational_le_antisymmetric(x, y, xy, yx):
   Q.Rational.le_antisymmetric(x, y, xy, yx)
 

@@ -280,6 +280,16 @@ law rational_le_transitive:
   for yz: Q.Rational.Le(y, z)
   Q.Rational.Le(x, z)
 
+law rational_le_respects_equality:
+  for x: Q.Rational
+  for x_replacement: Q.Rational
+  for y: Q.Rational
+  for y_replacement: Q.Rational
+  for x_equal: Q.Rational.Eq(x, x_replacement)
+  for y_equal: Q.Rational.Eq(y, y_replacement)
+  for xy: Q.Rational.Le(x, y)
+  Q.Rational.Le(x_replacement, y_replacement)
+
 law rational_le_antisymmetric:
   for x: Q.Rational
   for y: Q.Rational
