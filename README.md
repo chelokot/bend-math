@@ -22,6 +22,17 @@ Transitivity, field operations, order, completeness, and compatibility with
 the rational quotient are still open work. The checked definitions alone do
 not license any theorem about square packing.
 
+The next proof boundaries are:
+
+1. Finish the ordered-ring laws for `Integer` and the ordered-field laws for
+   `Rational`, including respect for cross-multiplication equality.
+2. Prove `Real.Eq` transitive and lift addition, multiplication, order and
+   limits to Cauchy representations, with all operations respecting `Real.Eq`.
+3. Prove completeness and construct square roots with their defining laws.
+4. Formalize only the extra exact inequalities required by the packing
+   theorems. The [archive's Bend migration branch](https://github.com/chelokot/square-packing-archive/tree/rewrite/bend2-formal-archive)
+   will then pin a checked revision of this package.
+
 The construction is informed by [Mathlib's Cauchy reals](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Basic/Real/Basic.html)
 and the published [`bend.how` examples](https://bend.how/lib/). Their current
 `Real` example supports a few named recipes rather than arbitrary reals. No
