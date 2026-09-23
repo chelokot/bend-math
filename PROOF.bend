@@ -194,6 +194,12 @@ def Laws.rational_one_mul(x):
 def Laws.rational_add_neg_self(x):
   Q.Rational.add_neg_self(x)
 
+def Laws.rational_mul_zero(x):
+  Q.Rational.mul_zero(x)
+
+def Laws.rational_dyadic_nonnegative(n):
+  Q.Rational.dyadic_nonnegative(n)
+
 def Laws.real_zero_exists():
   R.Real.zero()
 

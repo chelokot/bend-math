@@ -314,6 +314,14 @@ def Rational.add_neg_self(x: Rational) -> Rational.Eq(Rational.add(x, Rational.n
           Nat.mul(positive, 1n+denominator_predecessor),
           Nat.mul(negative, 1n+denominator_predecessor)))
 
+def Rational.mul_zero(x: Rational) -> Rational.Eq(Rational.mul(x, Rational.zero()), Rational.zero()):
+  match x:
+    case Fraction{+positive, +negative, +denominator_predecessor}:
+      Rational.eq_zero_if_balanced(
+        Nat.add(Nat.mul(positive, 0n), Nat.mul(negative, 0n)),
+        Nat.add(Nat.mul(positive, 0n), Nat.mul(negative, 0n)),
+        Rational.denominator_product(denominator_predecessor, 0n), {==})
+
 def Rational.Le(+x: Rational, +y: Rational) -> Type:
   N.Natural.Le(Rational.left_cross(x, y), Rational.right_cross(x, y))
 
@@ -484,3 +492,6 @@ def Rational.two_power_predecessor(n: Nat) -> Nat:
 
 def Rational.dyadic(n: Nat) -> Rational:
   Fraction{1n, 0n, Rational.two_power_predecessor(n)}
+
+def Rational.dyadic_nonnegative(n: Nat) -> Rational.Le(Rational.zero(), Rational.dyadic(n)):
+  N.Natural.zero_le(1n)

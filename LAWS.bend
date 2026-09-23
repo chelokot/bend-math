@@ -356,6 +356,14 @@ law rational_add_neg_self:
   for x: Q.Rational
   Q.Rational.Eq(Q.Rational.add(x, Q.Rational.neg(x)), Q.Rational.zero())
 
+law rational_mul_zero:
+  for x: Q.Rational
+  Q.Rational.Eq(Q.Rational.mul(x, Q.Rational.zero()), Q.Rational.zero())
+
+law rational_dyadic_nonnegative:
+  for n: Nat
+  Q.Rational.Le(Q.Rational.zero(), Q.Rational.dyadic(n))
+
 law real_zero_exists:
   R.Real
 
