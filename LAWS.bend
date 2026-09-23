@@ -315,6 +315,23 @@ law rational_mul_respects_equality:
   for y_equal: Q.Rational.Eq(y, y_replacement)
   Q.Rational.Eq(Q.Rational.mul(x, y), Q.Rational.mul(x_replacement, y_replacement))
 
+law rational_scale_preserves_equality:
+  for x: Q.Rational
+  for factor_predecessor: Nat
+  Q.Rational.Eq(x, Q.Rational.scale(x, factor_predecessor))
+
+law rational_mul_add_distributive:
+  for a: Q.Rational
+  for b: Q.Rational
+  for c: Q.Rational
+  Q.Rational.Eq(Q.Rational.mul(a, Q.Rational.add(b, c)), Q.Rational.add(Q.Rational.mul(a, b), Q.Rational.mul(a, c)))
+
+law rational_add_mul_distributive:
+  for a: Q.Rational
+  for b: Q.Rational
+  for c: Q.Rational
+  Q.Rational.Eq(Q.Rational.mul(Q.Rational.add(a, b), c), Q.Rational.add(Q.Rational.mul(a, c), Q.Rational.mul(b, c)))
+
 law rational_le_antisymmetric:
   for x: Q.Rational
   for y: Q.Rational

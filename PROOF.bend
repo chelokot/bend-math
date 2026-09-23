@@ -164,6 +164,15 @@ def Laws.rational_add_respects_equality(x, x_replacement, y, y_replacement, x_eq
 def Laws.rational_mul_respects_equality(x, x_replacement, y, y_replacement, x_equal, y_equal):
   Q.Rational.eq_mul_both(x, x_replacement, y, y_replacement, x_equal, y_equal)
 
+def Laws.rational_scale_preserves_equality(x, factor_predecessor):
+  Q.Rational.scale_preserves_eq(x, factor_predecessor)
+
+def Laws.rational_mul_add_distributive(a, b, c):
+  Q.Rational.mul_add_distributive(a, b, c)
+
+def Laws.rational_add_mul_distributive(a, b, c):
+  Q.Rational.add_mul_distributive(a, b, c)
+
 def Laws.rational_le_antisymmetric(x, y, xy, yx):
   Q.Rational.le_antisymmetric(x, y, xy, yx)
 

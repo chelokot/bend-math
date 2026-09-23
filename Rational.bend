@@ -36,6 +36,11 @@ def Rational.denominator(x: Rational) -> Nat:
     case Fraction{positive, negative, denominator_predecessor}:
       1n+denominator_predecessor
 
+def Rational.denominator_predecessor(x: Rational) -> Nat:
+  match x:
+    case Fraction{positive, negative, denominator_predecessor}:
+      denominator_predecessor
+
 def Rational.denominator_product(a: Nat, +b: Nat) -> Nat:
   Nat.add(b, Nat.mul(a, 1n+b))
 
@@ -125,6 +130,13 @@ def Rational.add(a: Rational, b: Rational) -> Rational:
         Nat.add(Nat.mul(an, 1n+bd), Nat.mul(bn, 1n+ad)),
         Rational.denominator_product(ad, bd)
       }
+
+def Rational.add_structural_congruent(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  ac: {a == c : Rational}, bd: {b == d : Rational}) -> {Rational.add(a, b) == Rational.add(c, d) : Rational}:
+  Equal.trans(Rational,
+    Rational.add(a, b), Rational.add(c, b), Rational.add(c, d),
+    Equal.cong(Rational, Rational, z => Rational.add(z, b), a, c, ac),
+    Equal.cong(Rational, Rational, z => Rational.add(c, z), b, d, bd))
 
 def Rational.add_commutative(a: Rational, b: Rational) -> {Rational.add(a, b) == Rational.add(b, a) : Rational}:
   match a b:
@@ -228,6 +240,15 @@ def Rational.mul(a: Rational, b: Rational) -> Rational:
         Rational.denominator_product(ad, bd)
       }
 
+def Rational.scale(x: Rational, +factor_predecessor: Nat) -> Rational:
+  match x:
+    case Fraction{positive, negative, denominator_predecessor}:
+      Fraction{
+        Nat.mul(positive, 1n+factor_predecessor),
+        Nat.mul(negative, 1n+factor_predecessor),
+        Rational.denominator_product(denominator_predecessor, factor_predecessor)
+      }
+
 def Rational.mul_commutative(a: Rational, b: Rational) -> {Rational.mul(a, b) == Rational.mul(b, a) : Rational}:
   match a b:
     case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd}:
@@ -309,6 +330,161 @@ def Rational.right_cross(+x: Rational, +y: Rational) -> Nat:
 
 def Rational.Eq(+x: Rational, +y: Rational) -> Type:
   {Rational.left_cross(x, y) == Rational.right_cross(x, y) : Nat}
+
+def Rational.eq_from_structural(+a: Rational, +b: Rational, proof: {a == b : Rational}) -> Rational.Eq(a, b):
+  %proof : Rational.Eq(a, _)
+  {==}
+
+def Rational.scale_preserves_eq(x: Rational, +factor_predecessor: Nat) -> Rational.Eq(x, Rational.scale(x, factor_predecessor)):
+  match x:
+    case Fraction{+p, +n, +d}:
+      +denominator: Nat = 1n+d
+      +factor: Nat = 1n+factor_predecessor
+      +scaled_denominator: Nat = 1n+Rational.denominator_product(d, factor_predecessor)
+      +left: Nat = Nat.add(Nat.mul(p, scaled_denominator), Nat.mul(Nat.mul(n, factor), denominator))
+      +right: Nat = Nat.add(Nat.mul(Nat.mul(p, factor), denominator), Nat.mul(n, scaled_denominator))
+      Equal.trans(Nat,
+        left,
+        Nat.add(Nat.mul(p, Nat.mul(denominator, factor)), Nat.mul(Nat.mul(n, factor), denominator)),
+        right,
+        N.Natural.eq_add_congruent(
+          Nat.mul(p, scaled_denominator), Nat.mul(Nat.mul(n, factor), denominator),
+          Nat.mul(p, Nat.mul(denominator, factor)), Nat.mul(Nat.mul(n, factor), denominator),
+          Equal.cong(Nat, Nat, z => Nat.mul(p, z),
+            scaled_denominator, Nat.mul(denominator, factor),
+            Rational.denominator_product_spec(d, factor_predecessor)),
+          {==}),
+        Equal.trans(Nat,
+          Nat.add(Nat.mul(p, Nat.mul(denominator, factor)), Nat.mul(Nat.mul(n, factor), denominator)),
+          Nat.add(Nat.mul(Nat.mul(p, factor), denominator), Nat.mul(n, Nat.mul(denominator, factor))),
+          right,
+          N.Natural.eq_add_congruent(
+            Nat.mul(p, Nat.mul(denominator, factor)), Nat.mul(Nat.mul(n, factor), denominator),
+            Nat.mul(Nat.mul(p, factor), denominator), Nat.mul(n, Nat.mul(denominator, factor)),
+            N.Natural.mul_inner_swap(p, denominator, factor),
+            Equal.sym(Nat,
+              Nat.mul(n, Nat.mul(denominator, factor)),
+              Nat.mul(Nat.mul(n, factor), denominator),
+              N.Natural.mul_inner_swap(n, denominator, factor))),
+          N.Natural.eq_add_congruent(
+            Nat.mul(Nat.mul(p, factor), denominator), Nat.mul(n, Nat.mul(denominator, factor)),
+            Nat.mul(Nat.mul(p, factor), denominator), Nat.mul(n, scaled_denominator),
+            {==},
+            Equal.cong(Nat, Nat, z => Nat.mul(n, z),
+              Nat.mul(denominator, factor), scaled_denominator,
+              Equal.sym(Nat, scaled_denominator, Nat.mul(denominator, factor),
+                Rational.denominator_product_spec(d, factor_predecessor))))))
+
+def Rational.distributive_scaled_numerator(+a: Nat, +b: Nat, +c: Nat, +d: Nat, +e: Nat, +f: Nat,
+  +ad: Nat, +bd: Nat, +cd: Nat) ->
+  {Nat.mul(Nat.add(
+     Nat.mul(a, Nat.add(Nat.mul(c, 1n+cd), Nat.mul(e, 1n+bd))),
+     Nat.mul(b, Nat.add(Nat.mul(d, 1n+cd), Nat.mul(f, 1n+bd)))), 1n+ad) ==
+   Nat.add(
+     Nat.mul(Nat.add(Nat.mul(a, c), Nat.mul(b, d)), 1n+Rational.denominator_product(ad, cd)),
+     Nat.mul(Nat.add(Nat.mul(a, e), Nat.mul(b, f)), 1n+Rational.denominator_product(ad, bd))) : Nat}:
+  +da: Nat = 1n+ad
+  +db: Nat = 1n+bd
+  +dc: Nat = 1n+cd
+  +first: Nat = Nat.add(Nat.mul(a, c), Nat.mul(b, d))
+  +second: Nat = Nat.add(Nat.mul(a, e), Nat.mul(b, f))
+  +left: Nat = Nat.mul(Nat.add(
+    Nat.mul(a, Nat.add(Nat.mul(c, dc), Nat.mul(e, db))),
+    Nat.mul(b, Nat.add(Nat.mul(d, dc), Nat.mul(f, db)))), da)
+  +middle: Nat = Nat.add(Nat.mul(first, Nat.mul(da, dc)), Nat.mul(second, Nat.mul(da, db)))
+  +right: Nat = Nat.add(
+    Nat.mul(first, 1n+Rational.denominator_product(ad, cd)),
+    Nat.mul(second, 1n+Rational.denominator_product(ad, bd)))
+  Equal.trans(Nat,
+    left, middle, right,
+    N.Natural.matrix_distributive_scaled(a, b, c, d, e, f, dc, db, da),
+    N.Natural.eq_add_congruent(
+      Nat.mul(first, Nat.mul(da, dc)), Nat.mul(second, Nat.mul(da, db)),
+      Nat.mul(first, 1n+Rational.denominator_product(ad, cd)),
+      Nat.mul(second, 1n+Rational.denominator_product(ad, bd)),
+      Equal.cong(Nat, Nat, z => Nat.mul(first, z),
+        Nat.mul(da, dc), 1n+Rational.denominator_product(ad, cd),
+        Equal.sym(Nat,
+          1n+Rational.denominator_product(ad, cd), Nat.mul(da, dc),
+          Rational.denominator_product_spec(ad, cd))),
+      Equal.cong(Nat, Nat, z => Nat.mul(second, z),
+        Nat.mul(da, db), 1n+Rational.denominator_product(ad, bd),
+        Equal.sym(Nat,
+          1n+Rational.denominator_product(ad, bd), Nat.mul(da, db),
+          Rational.denominator_product_spec(ad, bd)))))
+
+def Rational.denominator_distributive_scale(+ad: Nat, +bd: Nat, +cd: Nat) ->
+  {Rational.denominator_product(Rational.denominator_product(ad, Rational.denominator_product(bd, cd)), ad) ==
+   Rational.denominator_product(Rational.denominator_product(ad, bd), Rational.denominator_product(ad, cd)) : Nat}:
+  +da: Nat = 1n+ad
+  +db: Nat = 1n+bd
+  +dc: Nat = 1n+cd
+  +dab: Nat = Rational.denominator_product(ad, bd)
+  +dac: Nat = Rational.denominator_product(ad, cd)
+  +dbc: Nat = Rational.denominator_product(bd, cd)
+  +dabc: Nat = Rational.denominator_product(ad, dbc)
+  +left_predecessor: Nat = Rational.denominator_product(dabc, ad)
+  +right_predecessor: Nat = Rational.denominator_product(dab, dac)
+  +first: Nat = Nat.mul(1n+dabc, da)
+  +second: Nat = Nat.mul(Nat.mul(da, 1n+dbc), da)
+  +third: Nat = Nat.mul(Nat.mul(da, Nat.mul(db, dc)), da)
+  +fourth: Nat = Nat.mul(Nat.mul(da, da), Nat.mul(db, dc))
+  +fifth: Nat = Nat.mul(Nat.mul(da, db), Nat.mul(da, dc))
+  +sixth: Nat = Nat.mul(1n+dab, 1n+dac)
+  N.Natural.successor_injective(left_predecessor, right_predecessor,
+    Equal.trans(Nat,
+      1n+left_predecessor, first, 1n+right_predecessor,
+      Rational.denominator_product_spec(dabc, ad),
+      Equal.trans(Nat,
+        first, second, 1n+right_predecessor,
+        Equal.cong(Nat, Nat, z => Nat.mul(z, da),
+          1n+dabc, Nat.mul(da, 1n+dbc),
+          Rational.denominator_product_spec(ad, dbc)),
+        Equal.trans(Nat,
+          second, third, 1n+right_predecessor,
+          Equal.cong(Nat, Nat, z => Nat.mul(Nat.mul(da, z), da),
+            1n+dbc, Nat.mul(db, dc),
+            Rational.denominator_product_spec(bd, cd)),
+          Equal.trans(Nat,
+            third, fourth, 1n+right_predecessor,
+            N.Natural.mul_last_swap(da, Nat.mul(db, dc), da),
+            Equal.trans(Nat,
+              fourth, fifth, 1n+right_predecessor,
+              Equal.sym(Nat, fifth, fourth,
+                N.Natural.mul_four_middle_commute(da, db, da, dc)),
+              Equal.trans(Nat,
+                fifth, sixth, 1n+right_predecessor,
+                N.Natural.eq_mul_congruent(
+                  Nat.mul(da, db), Nat.mul(da, dc), 1n+dab, 1n+dac,
+                  Equal.sym(Nat, 1n+dab, Nat.mul(da, db), Rational.denominator_product_spec(ad, bd)),
+                  Equal.sym(Nat, 1n+dac, Nat.mul(da, dc), Rational.denominator_product_spec(ad, cd))),
+                Equal.sym(Nat,
+                  1n+right_predecessor, sixth,
+                  Rational.denominator_product_spec(dab, dac)))))))))
+
+def Rational.distributive_scaled_structural(a: Rational, b: Rational, c: Rational) ->
+  {Rational.scale(Rational.mul(a, Rational.add(b, c)), Rational.denominator_predecessor(a)) ==
+   Rational.add(Rational.mul(a, b), Rational.mul(a, c)) : Rational}:
+  match a b c:
+    case Fraction{+ap, +an, +ad} Fraction{+bp, +bn, +bd} Fraction{+cp, +cn, +cd}:
+      Rational.fraction_congruent(
+        Nat.mul(Nat.add(
+          Nat.mul(ap, Nat.add(Nat.mul(bp, 1n+cd), Nat.mul(cp, 1n+bd))),
+          Nat.mul(an, Nat.add(Nat.mul(bn, 1n+cd), Nat.mul(cn, 1n+bd)))), 1n+ad),
+        Nat.mul(Nat.add(
+          Nat.mul(ap, Nat.add(Nat.mul(bn, 1n+cd), Nat.mul(cn, 1n+bd))),
+          Nat.mul(an, Nat.add(Nat.mul(bp, 1n+cd), Nat.mul(cp, 1n+bd)))), 1n+ad),
+        Rational.denominator_product(Rational.denominator_product(ad, Rational.denominator_product(bd, cd)), ad),
+        Nat.add(
+          Nat.mul(Nat.add(Nat.mul(ap, bp), Nat.mul(an, bn)), 1n+Rational.denominator_product(ad, cd)),
+          Nat.mul(Nat.add(Nat.mul(ap, cp), Nat.mul(an, cn)), 1n+Rational.denominator_product(ad, bd))),
+        Nat.add(
+          Nat.mul(Nat.add(Nat.mul(ap, bn), Nat.mul(an, bp)), 1n+Rational.denominator_product(ad, cd)),
+          Nat.mul(Nat.add(Nat.mul(ap, cn), Nat.mul(an, cp)), 1n+Rational.denominator_product(ad, bd))),
+        Rational.denominator_product(Rational.denominator_product(ad, bd), Rational.denominator_product(ad, cd)),
+        Rational.distributive_scaled_numerator(ap, an, bp, bn, cp, cn, ad, bd, cd),
+        Rational.distributive_scaled_numerator(ap, an, bn, bp, cn, cp, ad, bd, cd),
+        Rational.denominator_distributive_scale(ad, bd, cd))
 
 def Rational.eq_zero_if_balanced(+positive: Nat, +negative: Nat, +denominator_predecessor: Nat, proof: {positive == negative : Nat}) -> Rational.Eq(Fraction{positive, negative, denominator_predecessor}, Rational.zero()):
   Equal.trans(Nat,
@@ -642,6 +818,29 @@ def Rational.eq_mul_both(+x: Rational, +x_replacement: Rational, +y: Rational, +
     Rational.mul(x, y), Rational.mul(x_replacement, y), Rational.mul(x_replacement, y_replacement),
     Rational.eq_mul_right(x, x_replacement, y, x_equal),
     Rational.eq_mul_left(y, y_replacement, x_replacement, y_equal))
+
+def Rational.mul_add_distributive(+a: Rational, +b: Rational, +c: Rational) ->
+  Rational.Eq(Rational.mul(a, Rational.add(b, c)), Rational.add(Rational.mul(a, b), Rational.mul(a, c))):
+  +left: Rational = Rational.mul(a, Rational.add(b, c))
+  +right: Rational = Rational.add(Rational.mul(a, b), Rational.mul(a, c))
+  +scaled: Rational = Rational.scale(left, Rational.denominator_predecessor(a))
+  Rational.eq_transitive(left, scaled, right,
+    Rational.scale_preserves_eq(left, Rational.denominator_predecessor(a)),
+    Rational.eq_from_structural(scaled, right,
+      Rational.distributive_scaled_structural(a, b, c)))
+
+def Rational.add_mul_distributive(+a: Rational, +b: Rational, +c: Rational) ->
+  Rational.Eq(Rational.mul(Rational.add(a, b), c), Rational.add(Rational.mul(a, c), Rational.mul(b, c))):
+  Rational.eq_structural_congruent(
+    Rational.mul(c, Rational.add(a, b)),
+    Rational.add(Rational.mul(c, a), Rational.mul(c, b)),
+    Rational.mul(Rational.add(a, b), c),
+    Rational.add(Rational.mul(a, c), Rational.mul(b, c)),
+    Rational.mul_add_distributive(c, a, b),
+    Rational.mul_commutative(c, Rational.add(a, b)),
+    Rational.add_structural_congruent(
+      Rational.mul(c, a), Rational.mul(c, b), Rational.mul(a, c), Rational.mul(b, c),
+      Rational.mul_commutative(c, a), Rational.mul_commutative(c, b)))
 
 def Rational.two_power_predecessor(n: Nat) -> Nat:
   match n:
