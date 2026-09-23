@@ -22,6 +22,15 @@ jobs:
         with:
           bun-version: 1.2.22
       - run: bun bend/bend2/main.ts PROOF.bend --check-only
+      - name: Reject a non-Cauchy sequence
+        run: |
+          if output=$(bun bend/bend2/main.ts tests/non_cauchy.bend --check-only 2>&1); then
+            exit 1
+          fi
+          case "$output" in
+            *'Integer.Le('*'observed : Unit'*) ;;
+            *) printf '%s\n' "$output"; exit 1 ;;
+          esac
       - name: Reject unchecked escape hatches
         run: |
           if grep -R -nE '@unsafe|\bforeign\b|\?TODO|\baxiom\b' --include='*.bend' --exclude-dir=bend .; then

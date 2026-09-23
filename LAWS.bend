@@ -2,6 +2,7 @@ import Base
 import ./Natural.bend as N
 import ./Integer.bend as Z
 import ./Rational.bend as Q
+import ./Real.bend as R
 
 law natural_le_reflexive:
   for n: Nat
@@ -58,3 +59,6 @@ law rational_denominator_product:
   for a: Nat
   for b: Nat
   {1n+Q.Rational.denominator_product(a, b) == Nat.mul(1n+a, 1n+b) : Nat}
+
+law real_zero_exists:
+  R.Real

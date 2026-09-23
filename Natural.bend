@@ -18,6 +18,13 @@ def Natural.le_reflexive(n: Nat) -> Natural.Le(n, n):
     case 1n+p:
       Natural.le_reflexive(p)
 
+def Natural.zero_le(n: Nat) -> Natural.Le(0n, n):
+  match n:
+    case 0n:
+      Unit{}
+    case 1n+p:
+      Unit{}
+
 def Natural.le_transitive(a: Nat, b: Nat, c: Nat, ab: Natural.Le(a, b), bc: Natural.Le(b, c)) -> Natural.Le(a, c):
   match a:
     case 0n:

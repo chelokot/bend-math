@@ -40,3 +40,6 @@ def Laws.rational_le_reflexive(x):
 
 def Laws.rational_denominator_product(a, b):
   Q.Rational.denominator_product_spec(a, b)
+
+def Laws.real_zero_exists():
+  R.Real.zero()
