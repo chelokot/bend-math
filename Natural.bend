@@ -1231,3 +1231,14 @@ def Natural.scaled_right_cross(+q: Nat, +m: Nat, +a: Nat, +b: Nat, +d: Nat) ->
       Equal.cong(Nat, Nat, z => Nat.add(z, ab), Nat.add(qa, mb), Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))),
         Equal.sym(Nat, Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))), Nat.add(qa, mb),
           Natural.mul_add_right(d, Nat.mul(q, a), Nat.mul(m, b))))))
+
+def Natural.le_copy(+a: Nat, +b: Nat, proof: Natural.Le(a, b)) -> Natural.Le(a, b) & Natural.Le(a, b):
+  match a b:
+    case 0n 0n:
+      (Unit{}, Unit{})
+    case 0n 1n+bp:
+      (Unit{}, Unit{})
+    case 1n+ap 0n:
+      match proof:
+    case 1n+ap 1n+bp:
+      Natural.le_copy(ap, bp, proof)

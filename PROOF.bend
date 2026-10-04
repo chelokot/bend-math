@@ -277,3 +277,21 @@ def Laws.real_eq_symmetric(x, y, proof):
 
 def Laws.real_eq_transitive(x, y, z, xy, yz):
   R.Real.eq_transitive(x, y, z, xy, yz)
+
+def Laws.real_add_commutative(x, y):
+  R.Real.add_commutative(x, y)
+
+def Laws.real_add_associative(x, y, z):
+  R.Real.add_associative(x, y, z)
+
+def Laws.real_add_zero(x):
+  R.Real.add_zero(x)
+
+def Laws.real_negation(x):
+  R.Real.neg(x)
+
+def Laws.real_neg_respects_eq(x, y, equal):
+  R.Real.neg_respects_eq(x, y, equal)
+
+def Laws.real_add_neg(x):
+  R.Real.add_neg(x)

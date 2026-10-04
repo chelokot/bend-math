@@ -531,3 +531,32 @@ law real_eq_transitive:
   for xy: R.Real.Eq(x, y)
   for yz: R.Real.Eq(y, z)
   R.Real.Eq(x, z)
+
+law real_add_commutative:
+  for x: R.Real
+  for y: R.Real
+  R.Real.Eq(R.Real.add(x, y), R.Real.add(y, x))
+
+law real_add_associative:
+  for x: R.Real
+  for y: R.Real
+  for z: R.Real
+  R.Real.Eq(R.Real.add(R.Real.add(x, y), z), R.Real.add(x, R.Real.add(y, z)))
+
+law real_add_zero:
+  for x: R.Real
+  R.Real.Eq(R.Real.add(x, R.Real.zero()), x)
+
+law real_negation:
+  for x: R.Real
+  R.Real
+
+law real_neg_respects_eq:
+  for x: R.Real
+  for y: R.Real
+  for equal: R.Real.Eq(x, y)
+  R.Real.Eq(R.Real.neg(x), R.Real.neg(y))
+
+law real_add_neg:
+  for x: R.Real
+  R.Real.Eq(R.Real.add(x, R.Real.neg(x)), R.Real.zero())
