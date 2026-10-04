@@ -40,6 +40,12 @@ proven kernel check generic theorems, and `RationalField.bend` proves that the
 rationals satisfy every axiom. A theorem proved for every such field holds for
 the real numbers in particular.
 
+`FieldAlgebra.bend` derives the equivalence, congruence and cancellation laws
+of that equality, and `FieldRing.bend` proves ring identities with negation
+over any such field. `FieldRing.equal` splits both sides into positive and
+negative polynomials, reuses the `Ring.bend` normal form, and its soundness is
+checked for every field.
+
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
 sorted monomials and is accepted only when the normal forms are identical. Its
