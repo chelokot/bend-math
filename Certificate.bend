@@ -199,14 +199,17 @@ def Certificate.scaled_order(~F: Kind(&2), ~field: K.Field<F>, +denominator: Nat
             Certificate.nonpositive_scaled(~F, ~field, k, g, O.FieldOrder.zero_le_of_nat(~F, ~field, denominator), nonpositive)),
           A.Algebra.same_reflexive(~F, ~field, A.Algebra.add(~F, ~field, g, A.Algebra.mul(~F, ~field, k, g))), A.Algebra.add_zero(~F, ~field, g)))
 
+def Certificate.Valid(+facts: Certificate.Exprs, +equations: Certificate.Exprs, +denominator: Nat, +goal: R.FieldRing.Expr, +terms: Certificate.Terms) -> Type:
+  {G.Ring.add(R.FieldRing.positive(R.FieldRing.split(R.Multiply{R.Number{1n+denominator}, goal})),
+      R.FieldRing.negative(R.FieldRing.split(Certificate.sum(facts, equations, terms)))) ==
+    G.Ring.add(R.FieldRing.positive(R.FieldRing.split(Certificate.sum(facts, equations, terms))),
+      R.FieldRing.negative(R.FieldRing.split(R.Multiply{R.Number{1n+denominator}, goal}))) : G.Ring.Poly}
+
 def Certificate.nonnegative(~F: Kind(&2), ~field: K.Field<F>, +values: R.FieldRing.Values<F>,
   +facts: Certificate.Exprs, +fact_proofs: Certificate.Facts(~F, ~field, values, facts),
   +equations: Certificate.Exprs, +equation_proofs: Certificate.Equations(~F, ~field, values, equations),
   +denominator: Nat, +goal: R.FieldRing.Expr, +terms: Certificate.Terms,
-  same: {G.Ring.add(R.FieldRing.positive(R.FieldRing.split(R.Multiply{R.Number{1n+denominator}, goal})),
-      R.FieldRing.negative(R.FieldRing.split(Certificate.sum(facts, equations, terms)))) ==
-    G.Ring.add(R.FieldRing.positive(R.FieldRing.split(Certificate.sum(facts, equations, terms))),
-      R.FieldRing.negative(R.FieldRing.split(R.Multiply{R.Number{1n+denominator}, goal}))) : G.Ring.Poly}) ->
+  same: Certificate.Valid(facts, equations, denominator, goal, terms)) ->
   A.Algebra.le(~F, ~field, A.Algebra.zero(~F, ~field), Certificate.value(~F, ~field, values, goal)):
   +g: F = Certificate.value(~F, ~field, values, goal)
   +total: F = Certificate.value(~F, ~field, values, Certificate.sum(facts, equations, terms))
@@ -217,3 +220,29 @@ def Certificate.nonnegative(~F: Kind(&2), ~field: K.Field<F>, +values: R.FieldRi
       A.Algebra.same_symmetric(~F, ~field, A.Algebra.mul(~F, ~field, R.FieldRing.of_nat(~F, ~field, 1n+denominator), g), total,
         R.FieldRing.equal(~F, ~field, values, R.Multiply{R.Number{1n+denominator}, goal}, Certificate.sum(facts, equations, terms), same))),
     K.Field.le_total(F, field)(A.Algebra.zero(~F, ~field), g))
+
+def Certificate.le(~F: Kind(&2), ~field: K.Field<F>, +values: R.FieldRing.Values<F>,
+  +facts: Certificate.Exprs, +fact_proofs: Certificate.Facts(~F, ~field, values, facts),
+  +equations: Certificate.Exprs, +equation_proofs: Certificate.Equations(~F, ~field, values, equations),
+  +lower: R.FieldRing.Expr, +upper: R.FieldRing.Expr, +denominator: Nat, +terms: Certificate.Terms,
+  same: Certificate.Valid(facts, equations, denominator, R.Plus{upper, R.Negate{lower}}, terms)) ->
+  A.Algebra.le(~F, ~field, Certificate.value(~F, ~field, values, lower), Certificate.value(~F, ~field, values, upper)):
+  +l: F = Certificate.value(~F, ~field, values, lower)
+  +u: F = Certificate.value(~F, ~field, values, upper)
+  A.Algebra.le_respects(~F, ~field, A.Algebra.add(~F, ~field, A.Algebra.zero(~F, ~field), l), A.Algebra.add(~F, ~field, A.Algebra.add(~F, ~field, u, A.Algebra.neg(~F, ~field, l)), l), l, u,
+    K.Field.le_add(F, field)(A.Algebra.zero(~F, ~field), A.Algebra.add(~F, ~field, u, A.Algebra.neg(~F, ~field, l)), l,
+      Certificate.nonnegative(~F, ~field, values, facts, fact_proofs, equations, equation_proofs, denominator, R.Plus{upper, R.Negate{lower}}, terms, same)),
+    A.Algebra.zero_add(~F, ~field, l),
+    R.FieldRing.equal(~F, ~field, R.Value{u, R.Value{l, R.NoValues{}}},
+      R.Plus{R.Plus{R.Variable{0n}, R.Negate{R.Variable{1n}}}, R.Variable{1n}}, R.Variable{0n}, {==}))
+
+def Certificate.same(~F: Kind(&2), ~field: K.Field<F>, +values: R.FieldRing.Values<F>,
+  +equations: Certificate.Exprs, +equation_proofs: Certificate.Equations(~F, ~field, values, equations),
+  +left: R.FieldRing.Expr, +right: R.FieldRing.Expr, +forward: Certificate.Terms, +backward: Certificate.Terms,
+  forward_valid: Certificate.Valid(NoExprs{}, equations, 0n, R.Plus{right, R.Negate{left}}, forward),
+  backward_valid: Certificate.Valid(NoExprs{}, equations, 0n, R.Plus{left, R.Negate{right}}, backward)) ->
+  A.Algebra.Same(~F, ~field, Certificate.value(~F, ~field, values, left), Certificate.value(~F, ~field, values, right)):
+  (
+    Certificate.le(~F, ~field, values, NoExprs{}, Unit{}, equations, equation_proofs, left, right, 0n, forward, forward_valid),
+    Certificate.le(~F, ~field, values, NoExprs{}, Unit{}, equations, equation_proofs, right, left, 0n, backward, backward_valid)
+  )
