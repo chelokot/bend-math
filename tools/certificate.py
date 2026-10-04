@@ -217,27 +217,109 @@ def feasible(columns, target):
     return weights
 
 
-def search(names, facts, equations, goal, squares, products, extra=1):
-    count = len(names)
-    fact_polys = [poly(parse(f, names), count) for f in facts]
-    square_exprs = [Num(1)] + [parse(s, names) for s in squares]
-    square_polys = [poly(e, count) for e in square_exprs]
-    goal_poly = poly(parse(goal, names), count)
-    candidates = []
+def ranking(equation_polys, count):
+    """Order variables so that a variable defined by an equation ranks above everything it is defined from."""
+    defined = {}
+    for e in equation_polys:
+        for v in range(count):
+            unit = tuple(1 if i == v else 0 for i in range(count))
+            if v not in defined and unit in e and all(m == unit or m[v] == 0 for m in e):
+                defined[v] = {i for m in e if m != unit for i, a in enumerate(m) if a}
+                break
+    order = []
+    visiting = set()
+
+    def visit(v):
+        if v in order or v in visiting:
+            return
+        visiting.add(v)
+        for w in sorted(defined.get(v, ())):
+            visit(w)
+        visiting.discard(v)
+        order.append(v)
+    for v in sorted(defined):
+        visit(v)
+    rest = [v for v in range(count) if v not in order]
+    return list(reversed(rest[::-1] + order))
+
+
+def monomial_key(rank):
+    return lambda m: tuple(m[v] for v in rank)
+
+
+def divides(lead, m):
+    return all(a <= b for a, b in zip(lead, m))
+
+
+def reduce(p, equation_polys, lead_monomials, key):
+    """Divide p by the equations along a fixed lexicographic order; return the remainder and the quotients."""
+    p = dict(p)
+    remainder = {}
+    quotients = [{} for _ in equation_polys]
+    while p:
+        m = max(p, key=key)
+        j = next((j for j, lead in enumerate(lead_monomials) if divides(lead, m)), None)
+        if j is None:
+            remainder[m] = p.pop(m)
+            continue
+        factor = {tuple(a - b for a, b in zip(m, lead_monomials[j])): p[m] / equation_polys[j][lead_monomials[j]]}
+        quotients[j] = add(quotients[j], factor)
+        p = add(p, {k: -v for k, v in mul(factor, equation_polys[j]).items()})
+    return remainder, quotients
+
+
+def candidates_of(fact_polys, square_polys, products):
+    out = []
     for size in range(products + 1):
-        for chosen in itertools.combinations_with_replacement(range(len(facts)), size):
+        for chosen in itertools.combinations_with_replacement(range(len(fact_polys)), size):
             for k, square in enumerate(square_polys):
                 if size + (k > 0) > products:
                     continue
-                p = square_polys[k]
-                p = mul(p, p)
+                p = mul(square, square)
                 for index in chosen:
                     p = mul(p, fact_polys[index])
                 if p:
-                    candidates.append(("product", chosen, k, p))
+                    out.append((chosen, k, p))
+    return out
+
+
+def lcm(values):
+    out = 1
+    for v in values:
+        out = out * v // math.gcd(out, v)
+    return out
+
+
+def reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, products):
+    key = monomial_key(ranking(equation_polys, count))
+    lead_monomials = [max(e, key=key) for e in equation_polys]
+    goal_form, _ = reduce(goal_poly, equation_polys, lead_monomials, key)
+    candidates = candidates_of(fact_polys, square_polys, products)
+    forms = [reduce(p, equation_polys, lead_monomials, key)[0] for _, _, p in candidates]
+    weights = feasible(forms, goal_form)
+    if weights is None:
+        return None
+    scale = lcm(w.denominator for w in weights)
+    residual = {m: scale * c for m, c in goal_poly.items()}
+    terms = []
+    for (chosen, k, p), weight in zip(candidates, weights):
+        if weight:
+            integer = weight * scale
+            terms.append((integer, chosen, k))
+            residual = add(residual, {m: -integer * c for m, c in p.items()})
+    remainder, quotients = reduce(residual, equation_polys, lead_monomials, key)
+    if remainder:
+        return None
+    extra_scale = lcm(c.denominator for q in quotients for c in q.values())
+    terms = [(int(c * extra_scale), chosen, k) for c, chosen, k in terms]
+    multipliers = {j: {m: c * extra_scale for m, c in q.items()} for j, q in enumerate(quotients) if q}
+    return scale * extra_scale, terms, multipliers
+
+
+def expanded_search(count, fact_polys, square_polys, equation_polys, goal_poly, products, extra):
+    candidates = [("product", chosen, k, p) for chosen, k, p in candidates_of(fact_polys, square_polys, products)]
     top = max([degree(c[3]) for c in candidates] + [degree(goal_poly)]) + extra
-    for j, equation in enumerate(equations):
-        e = poly(parse(equation, names), count)
+    for j, e in enumerate(equation_polys):
         for total in range(top - degree(e) + 1):
             for m in itertools.product(range(total + 1), repeat=count):
                 if sum(m) != total:
@@ -248,9 +330,7 @@ def search(names, facts, equations, goal, squares, products, extra=1):
     weights = feasible([c[3] for c in candidates], goal_poly)
     if weights is None:
         return None
-    scale = 1
-    for w in weights:
-        scale = scale * w.denominator // math.gcd(scale, w.denominator)
+    scale = lcm(w.denominator for w in weights)
     terms = []
     multipliers = {}
     for candidate, weight in zip(candidates, weights):
@@ -259,20 +339,37 @@ def search(names, facts, equations, goal, squares, products, extra=1):
         integer = weight * scale
         if candidate[0] == "product":
             _, chosen, k, _ = candidate
-            terms.append((int(integer), chosen, square_exprs[k]))
+            terms.append((int(integer), chosen, k))
         else:
             kind, j, m, _ = candidate
             sign = 1 if kind == "plus" else -1
             multipliers[j] = add(multipliers.get(j, {}), {m: sign * integer})
+    return scale, terms, multipliers
+
+
+def search(names, facts, equations, goal, squares, products, extra=1):
+    count = len(names)
+    fact_polys = [poly(parse(f, names), count) for f in facts]
+    square_exprs = [Num(1)] + [parse(s, names) for s in squares]
+    square_polys = [poly(e, count) for e in square_exprs]
+    equation_polys = [poly(parse(e, names), count) for e in equations]
+    goal_poly = poly(parse(goal, names), count)
+    found = reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, products)
+    if found is None:
+        found = expanded_search(count, fact_polys, square_polys, equation_polys, goal_poly, products, extra)
+    if found is None:
+        return None
+    scale, terms, multipliers = found
     check = {}
-    for coefficient, chosen, square in terms:
-        p = mul(poly(square, count), poly(square, count))
+    for coefficient, chosen, k in terms:
+        p = mul(square_polys[k], square_polys[k])
         for index in chosen:
             p = mul(p, fact_polys[index])
         check = add(check, {m: coefficient * c for m, c in p.items()})
     for j, multiplier in multipliers.items():
-        check = add(check, mul(multiplier, poly(parse(equations[j], names), count)))
+        check = add(check, mul(multiplier, equation_polys[j]))
     assert check == {m: scale * c for m, c in goal_poly.items() if c}, "certificate does not reproduce the goal"
+    terms = [(coefficient, chosen, square_exprs[k]) for coefficient, chosen, k in terms]
     return scale - 1, terms, {j: m for j, m in multipliers.items() if m}
 
 

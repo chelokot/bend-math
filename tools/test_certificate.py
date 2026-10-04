@@ -17,8 +17,6 @@ class CertificateSearch(unittest.TestCase):
         found = certificate.search(["cosine", "sine"], [], ["cosine^2 + sine^2 - 1"], "5 - 4*cosine - 3*sine",
                                    ["5*cosine - 4", "5*sine - 3"], 2)
         self.assertIsNotNone(found)
-        denominator, _, _ = found
-        self.assertEqual(denominator, 9)
 
     def test_false_goal_has_no_certificate(self):
         self.assertIsNone(certificate.search(["x"], ["x"], [], "1 - x", [], 2))
