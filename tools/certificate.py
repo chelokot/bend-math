@@ -217,7 +217,7 @@ def feasible(columns, target):
     return weights
 
 
-def search(names, facts, equations, goal, squares, products):
+def search(names, facts, equations, goal, squares, products, extra=1):
     count = len(names)
     fact_polys = [poly(parse(f, names), count) for f in facts]
     square_exprs = [Num(1)] + [parse(s, names) for s in squares]
@@ -235,7 +235,7 @@ def search(names, facts, equations, goal, squares, products):
                     p = mul(p, fact_polys[index])
                 if p:
                     candidates.append(("product", chosen, k, p))
-    top = max([degree(c[3]) for c in candidates] + [degree(goal_poly)])
+    top = max([degree(c[3]) for c in candidates] + [degree(goal_poly)]) + extra
     for j, equation in enumerate(equations):
         e = poly(parse(equation, names), count)
         for total in range(top - degree(e) + 1):
@@ -295,12 +295,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("problem", help="JSON file with names, facts, equations, goal and optional squares")
     parser.add_argument("--products", type=int, default=2, help="largest number of factors in one term")
+    parser.add_argument("--extra-degree", type=int, default=1,
+                        help="how far equation multiples may exceed the degree of the goal and the products")
     arguments = parser.parse_args()
     with open(arguments.problem) as file:
         problem = json.load(file)
     names = problem["names"]
     found = search(names, problem.get("facts", []), problem.get("equations", []), problem["goal"],
-                   problem.get("squares", []), arguments.products)
+                   problem.get("squares", []), arguments.products, arguments.extra_degree)
     if found is None:
         sys.exit("no certificate with these facts, equations and squares")
     denominator, terms = render(*found)
