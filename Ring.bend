@@ -482,3 +482,28 @@ def Ring.equal(+values: Ring.Values, +left: Ring.Expr, +right: Ring.Expr,
       Ring.eval_poly(values, Ring.norm(left)), Ring.eval_poly(values, Ring.norm(right)), Ring.eval(values, right),
       Equal.cong(Ring.Poly, Nat, z => Ring.eval_poly(values, z), Ring.norm(left), Ring.norm(right), same),
       Ring.norm_sound(values, right)))
+
+def Ring.overshoot(base: Nat, +slack: Nat, le: N.Natural.Le(Nat.add(base, 1n+slack), base)) -> Empty:
+  match base:
+    case 0n:
+      match le:
+    case 1n+previous:
+      Ring.overshoot(previous, slack, le)
+
+def Ring.refute(+values: Ring.Values, +left: Ring.Expr, +right: Ring.Expr, +slack: Ring.Expr,
+  le: N.Natural.Le(Ring.eval(values, left), Ring.eval(values, right)),
+  same: {Ring.norm(left) == Ring.norm(Sum{right, Next{slack}}) : Ring.Poly}) -> Empty:
+  Ring.overshoot(Ring.eval(values, right), Ring.eval(values, slack),
+    N.Natural.le_congruent(Ring.eval(values, left), Ring.eval(values, right),
+      Nat.add(Ring.eval(values, right), 1n+Ring.eval(values, slack)), Ring.eval(values, right),
+      le, Ring.equal(values, left, Sum{right, Next{slack}}, same), {==}))
+
+def Ring.cancel(+values: Ring.Values, +left: Ring.Expr, +right: Ring.Expr, +common: Ring.Expr, +smaller: Ring.Expr, +larger: Ring.Expr,
+  le: N.Natural.Le(Ring.eval(values, left), Ring.eval(values, right)),
+  left_same: {Ring.norm(left) == Ring.norm(Sum{common, smaller}) : Ring.Poly},
+  right_same: {Ring.norm(right) == Ring.norm(Sum{common, larger}) : Ring.Poly}) ->
+  N.Natural.Le(Ring.eval(values, smaller), Ring.eval(values, larger)):
+  N.Natural.le_add_left_cancel(Ring.eval(values, common), Ring.eval(values, smaller), Ring.eval(values, larger),
+    N.Natural.le_congruent(Ring.eval(values, left), Ring.eval(values, right),
+      Nat.add(Ring.eval(values, common), Ring.eval(values, smaller)), Nat.add(Ring.eval(values, common), Ring.eval(values, larger)),
+      le, Ring.equal(values, left, Sum{common, smaller}, left_same), Ring.equal(values, right, Sum{common, larger}, right_same)))
