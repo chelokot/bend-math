@@ -514,3 +514,11 @@ law real_eq_symmetric:
   for y: R.Real
   for proof: R.Real.Eq(x, y)
   R.Real.Eq(y, x)
+
+law real_eq_transitive:
+  for x: R.Real
+  for y: R.Real
+  for z: R.Real
+  for xy: R.Real.Eq(x, y)
+  for yz: R.Real.Eq(y, z)
+  R.Real.Eq(x, z)

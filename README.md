@@ -18,8 +18,8 @@ cannot substitute for that model.
 `Real.bend` represents a rational-valued regular Cauchy sequence, with
 equality defined by two directed cross-precision bounds. Bend checks that every
 rational has a constant real representation, equivalent rational
-representations give equivalent reals, real equality is reflexive and
-symmetric, and any two reals have a sum. Transitivity, multiplication, order,
+representations give equivalent reals, real equality is an equivalence
+relation, and any two reals have a sum. Multiplication, order,
 completeness, and compatibility with the rational quotient are still open
 work. The checked definitions alone do not license any theorem about square
 packing.
@@ -45,8 +45,8 @@ The next proof boundaries are:
    both distributive laws are proved. A nonzero rational has a checked
    multiplicative inverse, including compatibility with equivalent
    representations. Products of nonnegative rationals are nonnegative.
-2. Prove `Real.Eq` transitive, show that addition respects it, and lift
-   multiplication, order and limits to Cauchy representations.
+2. Show that addition respects `Real.Eq`, and lift negation, multiplication,
+   order and limits to Cauchy representations.
 3. Prove completeness and construct square roots with their defining laws.
 4. Formalize only the extra exact inequalities required by the packing
    theorems. The [archive's Bend migration branch](https://github.com/chelokot/square-packing-archive/tree/rewrite/bend2-formal-archive)

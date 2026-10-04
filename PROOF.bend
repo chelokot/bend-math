@@ -271,3 +271,6 @@ def Laws.real_eq_reflexive(x):
 
 def Laws.real_eq_symmetric(x, y, proof):
   R.Real.eq_symmetric(x, y, proof)
+
+def Laws.real_eq_transitive(x, y, z, xy, yz):
+  R.Real.eq_transitive(x, y, z, xy, yz)

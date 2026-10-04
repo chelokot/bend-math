@@ -1100,3 +1100,134 @@ def Natural.two_unit_cross(+half_denominator: Nat, +whole_denominator: Nat,
             Nat.mul(1n, Nat.mul(half_denominator, half_denominator)),
             Nat.mul(half_denominator, half_denominator),
             Natural.one_mul(Nat.mul(half_denominator, half_denominator)))))))
+
+def Natural.not_successor_le_self(n: Nat, proof: Natural.Le(1n+n, n)) -> Empty:
+  match n:
+    case 0n:
+      proof
+    case 1n+p:
+      Natural.not_successor_le_self(p, proof)
+
+def Natural.le_double(+n: Nat) -> Natural.Le(n, Nat.double(n)):
+  Natural.le_congruent(n, Nat.add(n, n), n, Nat.double(n), Natural.le_add_right(n, n), {==},
+    Equal.sym(Nat, Nat.double(n), Nat.add(n, n), Natural.double_add(n)))
+
+def Natural.le_scale_successor(+s: Nat, +h: Nat) -> Natural.Le(1n+s, Nat.mul(1n+s, 1n+h)):
+  Natural.le_congruent(1n+s, Nat.mul(1n+h, 1n+s), 1n+s, Nat.mul(1n+s, 1n+h),
+    Natural.le_add_right(1n+s, Nat.mul(h, 1n+s)), {==},
+    Natural.mul_commutative(1n+h, 1n+s))
+
+def Natural.le_of_scaled_gap(+s: Nat, +left: Nat, +right: Nat, +slack: Nat, +gap: Nat,
+  gap_is: {Nat.add(right, gap) == left : Nat},
+  scaled: Natural.Le(Nat.mul(1n+s, left), Nat.add(Nat.mul(1n+s, right), slack)),
+  small: Natural.Le(slack, s)) -> Natural.Le(left, right):
+  match gap:
+    case 0n:
+      Natural.le_congruent(right, right, left, right, Natural.le_reflexive(right),
+        Equal.trans(Nat, right, Nat.add(right, 0n), left, Equal.sym(Nat, Nat.add(right, 0n), right, Natural.add_zero(right)), gap_is),
+        {==})
+    case 1n+h:
+      +lifted: {Nat.mul(1n+s, left) == Nat.add(Nat.mul(1n+s, right), Nat.mul(1n+s, 1n+h)) : Nat} =
+        Equal.trans(Nat, Nat.mul(1n+s, left), Nat.mul(1n+s, Nat.add(right, 1n+h)), Nat.add(Nat.mul(1n+s, right), Nat.mul(1n+s, 1n+h)),
+          Equal.cong(Nat, Nat, z => Nat.mul(1n+s, z), left, Nat.add(right, 1n+h), Equal.sym(Nat, Nat.add(right, 1n+h), left, gap_is)),
+          Natural.mul_add_right(1n+s, right, 1n+h))
+      excess: Natural.Le(Nat.mul(1n+s, 1n+h), slack) =
+        Natural.le_add_left_cancel(Nat.mul(1n+s, right), Nat.mul(1n+s, 1n+h), slack,
+          Natural.le_congruent(Nat.mul(1n+s, left), Nat.add(Nat.mul(1n+s, right), slack),
+            Nat.add(Nat.mul(1n+s, right), Nat.mul(1n+s, 1n+h)), Nat.add(Nat.mul(1n+s, right), slack),
+            scaled, lifted, {==}))
+      Empty.absurd(Natural.Le(left, right),
+        Natural.not_successor_le_self(s,
+          Natural.le_transitive(1n+s, slack, s,
+            Natural.le_transitive(1n+s, Nat.mul(1n+s, 1n+h), slack, Natural.le_scale_successor(s, h), excess),
+            small)))
+
+def Natural.le_of_scaled_witness(+s: Nat, +left: Nat, +right: Nat, +slack: Nat,
+  witness: Exists(Nat, gap => {Nat.add(right, gap) == left : Nat}),
+  scaled: Natural.Le(Nat.mul(1n+s, left), Nat.add(Nat.mul(1n+s, right), slack)),
+  small: Natural.Le(slack, s)) -> Natural.Le(left, right):
+  (gap, gap_is) = witness
+  Natural.le_of_scaled_gap(s, left, right, slack, gap, gap_is, scaled, small)
+
+def Natural.le_of_scaled_order(+s: Nat, +left: Nat, +right: Nat, +slack: Nat,
+  order: Or(Natural.Le(left, right), Natural.Le(right, left)),
+  scaled: Natural.Le(Nat.mul(1n+s, left), Nat.add(Nat.mul(1n+s, right), slack)),
+  small: Natural.Le(slack, s)) -> Natural.Le(left, right):
+  match order:
+    case Inl{below}:
+      below
+    case Inr{above}:
+      Natural.le_of_scaled_witness(s, left, right, slack, Natural.le_gap(right, left, above), scaled, small)
+
+def Natural.le_of_scaled_le(+s: Nat, +left: Nat, +right: Nat, +slack: Nat,
+  scaled: Natural.Le(Nat.mul(1n+s, left), Nat.add(Nat.mul(1n+s, right), slack)),
+  small: Natural.Le(slack, s)) -> Natural.Le(left, right):
+  Natural.le_of_scaled_order(s, left, right, slack, Natural.le_total(left, right), scaled, small)
+
+def Natural.mul_pull_right(+p: Nat, +b: Nat, +d: Nat) -> {Nat.mul(p, Nat.mul(b, d)) == Nat.mul(d, Nat.mul(p, b)) : Nat}:
+  Equal.trans(Nat, Nat.mul(p, Nat.mul(b, d)), Nat.mul(Nat.mul(p, b), d), Nat.mul(d, Nat.mul(p, b)),
+    Equal.sym(Nat, Nat.mul(Nat.mul(p, b), d), Nat.mul(p, Nat.mul(b, d)), Natural.mul_associative(p, b, d)),
+    Natural.mul_commutative(Nat.mul(p, b), d))
+
+def Natural.mul_rotate(+n: Nat, +d: Nat, +a: Nat) -> {Nat.mul(Nat.mul(n, d), a) == Nat.mul(d, Nat.mul(n, a)) : Nat}:
+  Equal.trans(Nat, Nat.mul(Nat.mul(n, d), a), Nat.mul(n, Nat.mul(a, d)), Nat.mul(d, Nat.mul(n, a)),
+    Equal.trans(Nat, Nat.mul(Nat.mul(n, d), a), Nat.mul(n, Nat.mul(d, a)), Nat.mul(n, Nat.mul(a, d)),
+      Natural.mul_associative(n, d, a),
+      Equal.cong(Nat, Nat, z => Nat.mul(n, z), Nat.mul(d, a), Nat.mul(a, d), Natural.mul_commutative(d, a))),
+    Natural.mul_pull_right(n, a, d))
+
+def Natural.scaled_left_cross(+p: Nat, +n: Nat, +a: Nat, +b: Nat, +d: Nat) ->
+  {Nat.add(Nat.mul(p, Nat.mul(b, d)), Nat.mul(Nat.add(Nat.mul(n, d), 0n), a)) ==
+   Nat.mul(d, Nat.add(Nat.mul(p, b), Nat.mul(n, a))) : Nat}:
+  Equal.trans(Nat,
+    Nat.add(Nat.mul(p, Nat.mul(b, d)), Nat.mul(Nat.add(Nat.mul(n, d), 0n), a)),
+    Nat.add(Nat.mul(d, Nat.mul(p, b)), Nat.mul(d, Nat.mul(n, a))),
+    Nat.mul(d, Nat.add(Nat.mul(p, b), Nat.mul(n, a))),
+    Equal.trans(Nat,
+      Nat.add(Nat.mul(p, Nat.mul(b, d)), Nat.mul(Nat.add(Nat.mul(n, d), 0n), a)),
+      Nat.add(Nat.mul(d, Nat.mul(p, b)), Nat.mul(Nat.add(Nat.mul(n, d), 0n), a)),
+      Nat.add(Nat.mul(d, Nat.mul(p, b)), Nat.mul(d, Nat.mul(n, a))),
+      Equal.cong(Nat, Nat, z => Nat.add(z, Nat.mul(Nat.add(Nat.mul(n, d), 0n), a)),
+        Nat.mul(p, Nat.mul(b, d)), Nat.mul(d, Nat.mul(p, b)), Natural.mul_pull_right(p, b, d)),
+      Equal.cong(Nat, Nat, z => Nat.add(Nat.mul(d, Nat.mul(p, b)), z),
+        Nat.mul(Nat.add(Nat.mul(n, d), 0n), a), Nat.mul(d, Nat.mul(n, a)),
+        Equal.trans(Nat, Nat.mul(Nat.add(Nat.mul(n, d), 0n), a), Nat.mul(Nat.mul(n, d), a), Nat.mul(d, Nat.mul(n, a)),
+          Equal.cong(Nat, Nat, z => Nat.mul(z, a), Nat.add(Nat.mul(n, d), 0n), Nat.mul(n, d), Natural.add_zero(Nat.mul(n, d))),
+          Natural.mul_rotate(n, d, a)))),
+    Equal.sym(Nat, Nat.mul(d, Nat.add(Nat.mul(p, b), Nat.mul(n, a))), Nat.add(Nat.mul(d, Nat.mul(p, b)), Nat.mul(d, Nat.mul(n, a))),
+      Natural.mul_add_right(d, Nat.mul(p, b), Nat.mul(n, a))))
+
+def Natural.scaled_right_cross(+q: Nat, +m: Nat, +a: Nat, +b: Nat, +d: Nat) ->
+  {Nat.add(Nat.mul(Nat.add(Nat.mul(q, d), Nat.add(b, 0n)), a), Nat.mul(m, Nat.mul(b, d))) ==
+   Nat.add(Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))), Nat.mul(a, b)) : Nat}:
+  +qa: Nat = Nat.mul(d, Nat.mul(q, a))
+  +mb: Nat = Nat.mul(d, Nat.mul(m, b))
+  +ab: Nat = Nat.mul(a, b)
+  Equal.trans(Nat,
+    Nat.add(Nat.mul(Nat.add(Nat.mul(q, d), Nat.add(b, 0n)), a), Nat.mul(m, Nat.mul(b, d))),
+    Nat.add(Nat.add(qa, ab), mb),
+    Nat.add(Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))), ab),
+    Natural.eq_add_congruent(
+      Nat.mul(Nat.add(Nat.mul(q, d), Nat.add(b, 0n)), a), Nat.mul(m, Nat.mul(b, d)),
+      Nat.add(qa, ab), mb,
+      Equal.trans(Nat,
+        Nat.mul(Nat.add(Nat.mul(q, d), Nat.add(b, 0n)), a),
+        Nat.mul(Nat.add(Nat.mul(q, d), b), a),
+        Nat.add(qa, ab),
+        Equal.cong(Nat, Nat, z => Nat.mul(Nat.add(Nat.mul(q, d), z), a), Nat.add(b, 0n), b, Natural.add_zero(b)),
+        Equal.trans(Nat,
+          Nat.mul(Nat.add(Nat.mul(q, d), b), a),
+          Nat.add(Nat.mul(Nat.mul(q, d), a), Nat.mul(b, a)),
+          Nat.add(qa, ab),
+          Natural.mul_add_left(Nat.mul(q, d), b, a),
+          Natural.eq_add_congruent(Nat.mul(Nat.mul(q, d), a), Nat.mul(b, a), qa, ab,
+            Natural.mul_rotate(q, d, a), Natural.mul_commutative(b, a)))),
+      Natural.mul_pull_right(m, b, d)),
+    Equal.trans(Nat,
+      Nat.add(Nat.add(qa, ab), mb),
+      Nat.add(Nat.add(qa, mb), ab),
+      Nat.add(Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))), ab),
+      Natural.add_last_swap(qa, ab, mb),
+      Equal.cong(Nat, Nat, z => Nat.add(z, ab), Nat.add(qa, mb), Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))),
+        Equal.sym(Nat, Nat.mul(d, Nat.add(Nat.mul(q, a), Nat.mul(m, b))), Nat.add(qa, mb),
+          Natural.mul_add_right(d, Nat.mul(q, a), Nat.mul(m, b))))))

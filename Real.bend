@@ -16,10 +16,13 @@ type Real is Type:
     regular: @n: Nat -> @m: Nat -> Real.Sample<approximate, n, m>
   }
 
-def Real.approximate(real: Real, +precision: Nat) -> Q.Rational:
+def Real.approximations(real: Real) -> Nat -> Q.Rational:
   match real:
     case Cauchy{approximate, regular}:
-      approximate(precision)
+      approximate
+
+def Real.approximate(real: Real, +precision: Nat) -> Q.Rational:
+  Real.approximations(real)(precision)
 
 def Real.Eq(x: Real, y: Real) -> Type:
   @left_precision: Nat -> @right_precision: Nat -> Q.Rational.Close(Real.approximate(x, left_precision), Real.approximate(y, right_precision), Q.Rational.dyadic(left_precision), Q.Rational.dyadic(right_precision))
@@ -42,6 +45,13 @@ def Real.eq_reflexive(x: Real) -> Real.Eq(x, x):
 def Real.eq_symmetric(x: Real, y: Real, proof: Real.Eq(x, y)) -> Real.Eq(y, x):
   +right_precision => +left_precision =>
     Q.Rational.close_symmetric(Real.approximate(x, left_precision), Real.approximate(y, right_precision), Q.Rational.dyadic(left_precision), Q.Rational.dyadic(right_precision), proof(left_precision)(right_precision))
+
+def Real.eq_transitive(x: Real, y: Real, z: Real, xy: Real.Eq(x, y), yz: Real.Eq(y, z)) -> Real.Eq(x, z):
+  +left_precision => +right_precision =>
+    Q.Rational.close_transitive_dyadic(
+      Real.approximate(x, left_precision), Real.approximate(z, right_precision),
+      left_precision, right_precision, Real.approximations(y),
+      xy(left_precision), +middle_precision => yz(middle_precision)(right_precision))
 
 def Real.of_rational(+rational: Q.Rational) -> Real:
   Cauchy{
