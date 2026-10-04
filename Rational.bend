@@ -1,5 +1,6 @@
 import Base
 import ./Natural.bend as N
+import ./Ring.bend as G
 import ./Integer.bend as Z
 
 type Rational is Data:
@@ -1401,6 +1402,7 @@ def Rational.le_of_le_add_dyadic(+x: Rational, +y: Rational, +k: Nat,
     case Fraction{+xp, +xn, +xd} Fraction{+yp, +yn, +yd}:
       +slack: Nat = Nat.mul(1n+xd, 1n+yd)
       +s: Nat = Rational.two_power_predecessor(k)
+      +values: G.Ring.Values = G.Value{xp, G.Value{xn, G.Value{xd, G.Value{yp, G.Value{yn, G.Value{yd, G.Value{s, G.NoValues{}}}}}}}}
       N.Natural.le_of_scaled_le(s,
         Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd)),
         Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd)),
@@ -1411,8 +1413,17 @@ def Rational.le_of_le_add_dyadic(+x: Rational, +y: Rational, +k: Nat,
           Nat.mul(1n+s, Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd))),
           Nat.add(Nat.mul(1n+s, Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd))), slack),
           bound,
-          N.Natural.scaled_left_cross(xp, yn, 1n+xd, 1n+yd, 1n+s),
-          N.Natural.scaled_right_cross(yp, xn, 1n+xd, 1n+yd, 1n+s)),
+          G.Ring.equal(values,
+            G.Sum{G.Product{G.Atom{0n}, G.Product{G.Next{G.Atom{5n}}, G.Next{G.Atom{6n}}}},
+              G.Product{G.Sum{G.Product{G.Atom{4n}, G.Next{G.Atom{6n}}}, G.Constant{0n}}, G.Next{G.Atom{2n}}}},
+            G.Product{G.Next{G.Atom{6n}}, G.Sum{G.Product{G.Atom{0n}, G.Next{G.Atom{5n}}}, G.Product{G.Atom{4n}, G.Next{G.Atom{2n}}}}},
+            {==}),
+          G.Ring.equal(values,
+            G.Sum{G.Product{G.Sum{G.Product{G.Atom{3n}, G.Next{G.Atom{6n}}}, G.Sum{G.Next{G.Atom{5n}}, G.Constant{0n}}}, G.Next{G.Atom{2n}}},
+              G.Product{G.Atom{1n}, G.Product{G.Next{G.Atom{5n}}, G.Next{G.Atom{6n}}}}},
+            G.Sum{G.Product{G.Next{G.Atom{6n}}, G.Sum{G.Product{G.Atom{3n}, G.Next{G.Atom{2n}}}, G.Product{G.Atom{1n}, G.Next{G.Atom{5n}}}}},
+              G.Product{G.Next{G.Atom{2n}}, G.Next{G.Atom{5n}}}},
+            {==})),
         N.Natural.le_transitive(slack, k, s, large, Rational.two_power_predecessor_exceeds(k)))
 
 def Rational.le_chain(+a: Rational, +b: Rational, +c: Rational, +first_error: Rational, +second_error: Rational,
