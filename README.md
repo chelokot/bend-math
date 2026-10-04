@@ -19,7 +19,7 @@ cannot substitute for that model.
 equality defined by two directed cross-precision bounds. Bend checks that every
 rational has a constant real representation, equivalent rational
 representations give equivalent reals, real equality is an equivalence
-relation, and any two reals have a sum. Multiplication, order,
+relation, and addition is defined and respects it. Multiplication, order,
 completeness, and compatibility with the rational quotient are still open
 work. The checked definitions alone do not license any theorem about square
 packing.
@@ -45,7 +45,7 @@ The next proof boundaries are:
    both distributive laws are proved. A nonzero rational has a checked
    multiplicative inverse, including compatibility with equivalent
    representations. Products of nonnegative rationals are nonnegative.
-2. Show that addition respects `Real.Eq`, and lift negation, multiplication,
+2. Prove the additive group laws for reals, and lift negation, multiplication,
    order and limits to Cauchy representations.
 3. Prove completeness and construct square roots with their defining laws.
 4. Formalize only the extra exact inequalities required by the packing

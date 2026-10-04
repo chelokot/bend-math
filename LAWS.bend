@@ -505,6 +505,15 @@ law real_addition:
   for y: R.Real
   R.Real
 
+law real_add_respects_eq:
+  for x: R.Real
+  for y: R.Real
+  for other_x: R.Real
+  for other_y: R.Real
+  for x_equal: R.Real.Eq(x, other_x)
+  for y_equal: R.Real.Eq(y, other_y)
+  R.Real.Eq(R.Real.add(x, y), R.Real.add(other_x, other_y))
+
 law real_eq_reflexive:
   for x: R.Real
   R.Real.Eq(x, x)

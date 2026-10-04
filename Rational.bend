@@ -1501,3 +1501,4 @@ def Rational.close_transitive_dyadic(+a: Rational, +c: Rational, +n: Nat, +m: Na
     N.Natural.le_add_right(forward, backward),
     N.Natural.le_congruent(backward, Nat.add(backward, forward), backward, k,
       N.Natural.le_add_right(backward, forward), {==}, N.Natural.add_commutative(backward, forward)))
+

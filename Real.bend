@@ -145,3 +145,18 @@ def Real.add(x: Real, y: Real) -> Real:
             x_regular(1n+left_precision)(1n+right_precision),
             y_regular(1n+left_precision)(1n+right_precision))
       }
+
+def Real.add_respects_eq(x: Real, y: Real, other_x: Real, other_y: Real,
+  x_equal: Real.Eq(x, other_x), y_equal: Real.Eq(y, other_y)) ->
+  Real.Eq(Real.add(x, y), Real.add(other_x, other_y)):
+  match x y other_x other_y:
+    case Cauchy{x_approximate, x_regular} Cauchy{y_approximate, y_regular} Cauchy{other_x_approximate, other_x_regular} Cauchy{other_y_approximate, other_y_regular}:
+      +left_precision => +right_precision =>
+        +a: Q.Rational = x_approximate(1n+left_precision)
+        +b: Q.Rational = y_approximate(1n+left_precision)
+        +c: Q.Rational = other_x_approximate(1n+right_precision)
+        +d: Q.Rational = other_y_approximate(1n+right_precision)
+        Q.Rational.close_halve_errors(Q.Rational.add(a, b), Q.Rational.add(c, d), left_precision, right_precision,
+          Q.Rational.close_add_same_errors(a, c, b, d,
+            Q.Rational.dyadic(1n+left_precision), Q.Rational.dyadic(1n+right_precision),
+            x_equal(1n+left_precision)(1n+right_precision), y_equal(1n+left_precision)(1n+right_precision)))
