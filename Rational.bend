@@ -725,7 +725,7 @@ def Rational.mul_zero(x: Rational) -> Rational.Eq(Rational.mul(x, Rational.zero(
         Nat.add(Nat.mul(positive, 0n), Nat.mul(negative, 0n)),
         Rational.denominator_product(denominator_predecessor, 0n), {==})
 
-def Rational.Le(+x: Rational, +y: Rational) -> Type:
+def Rational.Le(+x: Rational, +y: Rational) -> Kind(&2):
   N.Natural.Le(Rational.left_cross(x, y), Rational.right_cross(x, y))
 
 def Rational.nonnegative_left_cross(+p: Nat, +n: Nat, +d: Nat) ->
@@ -1513,36 +1513,22 @@ def Rational.close_transitive_dyadic(+a: Rational, +c: Rational, +n: Nat, +m: Na
     N.Natural.le_congruent(backward, Nat.add(backward, forward), backward, k,
       N.Natural.le_add_right(backward, forward), {==}, N.Natural.add_commutative(backward, forward)))
 
-def Rational.le_copy(+x: Rational, +y: Rational, proof: Rational.Le(x, y)) -> Rational.Le(x, y) & Rational.Le(x, y):
-  N.Natural.le_copy(Rational.left_cross(x, y), Rational.right_cross(x, y), proof)
-
-def Rational.close_weaken_with_copies(+x: Rational, +y: Rational,
+def Rational.close_weaken(+x: Rational, +y: Rational,
   +left_error: Rational, +right_error: Rational, +new_left_error: Rational, +new_right_error: Rational,
   proof: Rational.Close(x, y, left_error, right_error),
-  left_le: Rational.Le(left_error, new_left_error) & Rational.Le(left_error, new_left_error),
-  right_le: Rational.Le(right_error, new_right_error) & Rational.Le(right_error, new_right_error)) ->
+  +left_le: Rational.Le(left_error, new_left_error), +right_le: Rational.Le(right_error, new_right_error)) ->
   Rational.Close(x, y, new_left_error, new_right_error):
   (forward, backward) = proof
-  (left_le_forward, left_le_backward) = left_le
-  (right_le_forward, right_le_backward) = right_le
   (
     Rational.le_transitive(x, Rational.add(y, Rational.add(left_error, right_error)), Rational.add(y, Rational.add(new_left_error, new_right_error)),
       forward,
       Rational.le_add_left(Rational.add(left_error, right_error), Rational.add(new_left_error, new_right_error), y,
-        Rational.le_add_both(left_error, new_left_error, right_error, new_right_error, left_le_forward, right_le_forward))),
+        Rational.le_add_both(left_error, new_left_error, right_error, new_right_error, left_le, right_le))),
     Rational.le_transitive(y, Rational.add(x, Rational.add(right_error, left_error)), Rational.add(x, Rational.add(new_right_error, new_left_error)),
       backward,
       Rational.le_add_left(Rational.add(right_error, left_error), Rational.add(new_right_error, new_left_error), x,
-        Rational.le_add_both(right_error, new_right_error, left_error, new_left_error, right_le_backward, left_le_backward)))
+        Rational.le_add_both(right_error, new_right_error, left_error, new_left_error, right_le, left_le)))
   )
-
-def Rational.close_weaken(+x: Rational, +y: Rational,
-  +left_error: Rational, +right_error: Rational, +new_left_error: Rational, +new_right_error: Rational,
-  proof: Rational.Close(x, y, left_error, right_error),
-  left_le: Rational.Le(left_error, new_left_error), right_le: Rational.Le(right_error, new_right_error)) ->
-  Rational.Close(x, y, new_left_error, new_right_error):
-  Rational.close_weaken_with_copies(x, y, left_error, right_error, new_left_error, new_right_error, proof,
-    Rational.le_copy(left_error, new_left_error, left_le), Rational.le_copy(right_error, new_right_error, right_le))
 
 def Rational.dyadic_decreasing(+n: Nat) -> Rational.Le(Rational.dyadic(1n+n), Rational.dyadic(n)):
   Rational.le_replace(

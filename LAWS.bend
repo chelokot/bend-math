@@ -3,6 +3,7 @@ import ./Natural.bend as N
 import ./Integer.bend as Z
 import ./Rational.bend as Q
 import ./Real.bend as R
+import ./Field.bend as K
 
 law natural_le_reflexive:
   for n: Nat
@@ -560,3 +561,6 @@ law real_neg_respects_eq:
 law real_add_neg:
   for x: R.Real
   R.Real.Eq(R.Real.add(x, R.Real.neg(x)), R.Real.zero())
+
+law rational_ordered_field:
+  K.Field<Q.Rational>
