@@ -4,4 +4,4 @@ import ../Rational.bend as Q
 import ../Real.bend as R
 
 def bad() -> R.Real:
-  R.Cauchy{n => Q.Rational.of_nat(n), n => m => N.Natural.zero_le(0n)}
+  R.Cauchy{+n => Q.Rational.of_nat(n), +n => +m => R.Sample{Q.Rational.of_nat(n), Q.Rational.of_nat(m), {==}, {==}, N.Natural.zero_le(0n)}}

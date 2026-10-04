@@ -500,6 +500,11 @@ law real_rational_embedding_respects_equality:
   for equality: Q.Rational.Eq(a, b)
   R.Real.Eq(R.Real.of_rational(a), R.Real.of_rational(b))
 
+law real_addition:
+  for x: R.Real
+  for y: R.Real
+  R.Real
+
 law real_eq_reflexive:
   for x: R.Real
   R.Real.Eq(x, x)

@@ -263,6 +263,9 @@ def Laws.real_rational_embedding(rational):
 def Laws.real_rational_embedding_respects_equality(a, b, equality):
   R.Real.of_rational_eq(a, b, equality)
 
+def Laws.real_addition(x, y):
+  R.Real.add(x, y)
+
 def Laws.real_eq_reflexive(x):
   R.Real.eq_reflexive(x)
 
