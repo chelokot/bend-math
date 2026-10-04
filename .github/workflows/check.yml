@@ -31,6 +31,7 @@ jobs:
       - run: bun bend/bend2/main.ts tests/field.bend --verdict
       - run: bun bend/bend2/main.ts tests/field_ring.bend --verdict
       - run: bun bend/bend2/main.ts FieldRing.bend --verdict
+      - run: bun bend/bend2/main.ts FieldOrder.bend --verdict
       - name: Reject a non-Cauchy sequence
         run: |
           if output=$(bun bend/bend2/main.ts tests/non_cauchy.bend --check-only 2>&1); then

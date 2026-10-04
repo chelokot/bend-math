@@ -44,7 +44,9 @@ the real numbers in particular.
 of that equality, and `FieldRing.bend` proves ring identities with negation
 over any such field. `FieldRing.equal` splits both sides into positive and
 negative polynomials, reuses the `Ring.bend` normal form, and its soundness is
-checked for every field.
+checked for every field. `FieldOrder.bend` adds the order facts the packing
+proofs use: adding inequalities, negation reversing the order, and the
+embedding of the naturals being nonnegative and monotone.
 
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
