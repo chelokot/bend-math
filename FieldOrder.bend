@@ -64,3 +64,35 @@ def FieldOrder.le_of_lt_order(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, st
 
 def FieldOrder.le_of_lt(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, strict: FieldOrder.Lt(~F, ~field, a, b)) -> A.Algebra.le(~F, ~field, a, b):
   FieldOrder.le_of_lt_order(~F, ~field, a, b, strict, K.Field.le_total(F, field)(a, b))
+
+def FieldOrder.IsRight(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, order: Or(A.Algebra.le(~F, ~field, a, b), A.Algebra.le(~F, ~field, a, b) -> Empty)) -> Kind(&2):
+  match order:
+    case Inl{below}:
+      Empty
+    case Inr{above}:
+      Unit
+
+def FieldOrder.Strict(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F) -> Kind(&2):
+  FieldOrder.IsRight(~F, ~field, b, a, K.Field.le_decidable(F, field)(b, a))
+
+def FieldOrder.right_of(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, order: Or(A.Algebra.le(~F, ~field, a, b), A.Algebra.le(~F, ~field, a, b) -> Empty), never: A.Algebra.le(~F, ~field, a, b) -> Empty) ->
+  FieldOrder.IsRight(~F, ~field, a, b, order):
+  match order:
+    case Inl{below}:
+      never(below)
+    case Inr{above}:
+      Unit{}
+
+def FieldOrder.never_of(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, order: Or(A.Algebra.le(~F, ~field, a, b), A.Algebra.le(~F, ~field, a, b) -> Empty), right: FieldOrder.IsRight(~F, ~field, a, b, order)) ->
+  A.Algebra.le(~F, ~field, a, b) -> Empty:
+  match order:
+    case Inl{below}:
+      Empty.absurd(A.Algebra.le(~F, ~field, a, b) -> Empty, right)
+    case Inr{above}:
+      above
+
+def FieldOrder.strict_of(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, less: FieldOrder.Lt(~F, ~field, a, b)) -> FieldOrder.Strict(~F, ~field, a, b):
+  FieldOrder.right_of(~F, ~field, b, a, K.Field.le_decidable(F, field)(b, a), less)
+
+def FieldOrder.lt_of(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F, +strict: FieldOrder.Strict(~F, ~field, a, b)) -> FieldOrder.Lt(~F, ~field, a, b):
+  FieldOrder.never_of(~F, ~field, b, a, K.Field.le_decidable(F, field)(b, a), strict)
