@@ -16,13 +16,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: bendlang/bend
-          ref: 26659268dbdf411696bf90d28e722783dceae0f8
+          ref: 79df8d9c40722ee9507a1e253f283b51025f9d6c
           path: bend
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.2.22
-      - run: bun bend/bend2/main.ts PROOF.bend --check-only
-      - run: bun bend/bend2/main.ts tests/arithmetic.bend --check-only
+          bun-version: 1.4.2
+      - name: Install the Lean toolchain of the proven kernel
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: bun bend/bend2/main.ts PROOF.bend --verdict
+      - run: bun bend/bend2/main.ts tests/arithmetic.bend --verdict
       - name: Reject a non-Cauchy sequence
         run: |
           if output=$(bun bend/bend2/main.ts tests/non_cauchy.bend --check-only 2>&1); then

@@ -1382,3 +1382,298 @@ def Rational.close_halve_errors(+x: Rational, +y: Rational, +n: Nat, +m: Nat,
 
 def Rational.dyadic_nonnegative(n: Nat) -> Rational.Le(Rational.zero(), Rational.dyadic(n)):
   N.Natural.zero_le(1n)
+
+def Rational.two_power_predecessor_exceeds(+n: Nat) -> N.Natural.Le(n, Rational.two_power_predecessor(n)):
+  match n:
+    case 0n:
+      Unit{}
+    case 1n+p:
+      N.Natural.le_transitive(p, Rational.two_power_predecessor(p), Nat.double(Rational.two_power_predecessor(p)),
+        Rational.two_power_predecessor_exceeds(p), N.Natural.le_double(Rational.two_power_predecessor(p)))
+
+def Rational.slack(+x: Rational, +y: Rational) -> Nat:
+  Nat.mul(Rational.denominator(x), Rational.denominator(y))
+
+def Rational.le_of_le_add_dyadic(+x: Rational, +y: Rational, +k: Nat,
+  large: N.Natural.Le(Rational.slack(x, y), k),
+  bound: Rational.Le(x, Rational.add(y, Rational.dyadic(k)))) -> Rational.Le(x, y):
+  match x y:
+    case Fraction{+xp, +xn, +xd} Fraction{+yp, +yn, +yd}:
+      +slack: Nat = Nat.mul(1n+xd, 1n+yd)
+      +s: Nat = Rational.two_power_predecessor(k)
+      N.Natural.le_of_scaled_le(s,
+        Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd)),
+        Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd)),
+        slack,
+        N.Natural.le_congruent(
+          Nat.add(Nat.mul(xp, Nat.mul(1n+yd, 1n+s)), Nat.mul(Nat.add(Nat.mul(yn, 1n+s), 0n), 1n+xd)),
+          Nat.add(Nat.mul(Nat.add(Nat.mul(yp, 1n+s), Nat.add(1n+yd, 0n)), 1n+xd), Nat.mul(xn, Nat.mul(1n+yd, 1n+s))),
+          Nat.mul(1n+s, Nat.add(Nat.mul(xp, 1n+yd), Nat.mul(yn, 1n+xd))),
+          Nat.add(Nat.mul(1n+s, Nat.add(Nat.mul(yp, 1n+xd), Nat.mul(xn, 1n+yd))), slack),
+          bound,
+          N.Natural.scaled_left_cross(xp, yn, 1n+xd, 1n+yd, 1n+s),
+          N.Natural.scaled_right_cross(yp, xn, 1n+xd, 1n+yd, 1n+s)),
+        N.Natural.le_transitive(slack, k, s, large, Rational.two_power_predecessor_exceeds(k)))
+
+def Rational.le_chain(+a: Rational, +b: Rational, +c: Rational, +first_error: Rational, +second_error: Rational,
+  ab: Rational.Le(a, Rational.add(b, first_error)),
+  bc: Rational.Le(b, Rational.add(c, second_error))) ->
+  Rational.Le(a, Rational.add(c, Rational.add(second_error, first_error))):
+  Rational.le_structural_congruent(
+    a, Rational.add(Rational.add(c, second_error), first_error),
+    a, Rational.add(c, Rational.add(second_error, first_error)),
+    Rational.le_transitive(a, Rational.add(b, first_error), Rational.add(Rational.add(c, second_error), first_error),
+      ab, Rational.le_add_right(b, Rational.add(c, second_error), first_error, bc)),
+    {==},
+    Rational.add_associative(c, second_error, first_error))
+
+def Rational.errors_regroup(+middle: Rational, +outer: Rational, +inner: Rational) ->
+  {Rational.add(Rational.add(middle, outer), Rational.add(inner, middle)) ==
+   Rational.add(Rational.add(inner, outer), Rational.add(middle, middle)) : Rational}:
+  Equal.trans(Rational,
+    Rational.add(Rational.add(middle, outer), Rational.add(inner, middle)),
+    Rational.add(Rational.add(outer, middle), Rational.add(inner, middle)),
+    Rational.add(Rational.add(inner, outer), Rational.add(middle, middle)),
+    Equal.cong(Rational, Rational, z => Rational.add(z, Rational.add(inner, middle)),
+      Rational.add(middle, outer), Rational.add(outer, middle), Rational.add_commutative(middle, outer)),
+    Equal.trans(Rational,
+      Rational.add(Rational.add(outer, middle), Rational.add(inner, middle)),
+      Rational.add(Rational.add(outer, inner), Rational.add(middle, middle)),
+      Rational.add(Rational.add(inner, outer), Rational.add(middle, middle)),
+      Rational.add_middle_commute(outer, middle, inner, middle),
+      Equal.cong(Rational, Rational, z => Rational.add(z, Rational.add(middle, middle)),
+        Rational.add(outer, inner), Rational.add(inner, outer), Rational.add_commutative(outer, inner))))
+
+def Rational.le_through_dyadic(+a: Rational, +b: Rational, +c: Rational, +inner: Rational, +outer: Rational, +k: Nat,
+  ab: Rational.Le(a, Rational.add(b, Rational.add(inner, Rational.dyadic(1n+k)))),
+  bc: Rational.Le(b, Rational.add(c, Rational.add(Rational.dyadic(1n+k), outer)))) ->
+  Rational.Le(a, Rational.add(Rational.add(c, Rational.add(inner, outer)), Rational.dyadic(k))):
+  +half: Rational = Rational.dyadic(1n+k)
+  +errors: Rational = Rational.add(inner, outer)
+  Rational.le_replace(
+    a, a,
+    Rational.add(c, Rational.add(errors, Rational.add(half, half))),
+    Rational.add(Rational.add(c, errors), Rational.dyadic(k)),
+    Rational.eq_reflexive(a),
+    Rational.eq_structural_congruent(
+      Rational.add(c, Rational.add(errors, Rational.add(half, half))),
+      Rational.add(c, Rational.add(errors, Rational.dyadic(k))),
+      Rational.add(c, Rational.add(errors, Rational.add(half, half))),
+      Rational.add(Rational.add(c, errors), Rational.dyadic(k)),
+      Rational.eq_add_left(Rational.add(errors, Rational.add(half, half)), Rational.add(errors, Rational.dyadic(k)), c,
+        Rational.eq_add_left(Rational.add(half, half), Rational.dyadic(k), errors, Rational.dyadic_double(k))),
+      {==},
+      Equal.sym(Rational, Rational.add(Rational.add(c, errors), Rational.dyadic(k)), Rational.add(c, Rational.add(errors, Rational.dyadic(k))),
+        Rational.add_associative(c, errors, Rational.dyadic(k)))),
+    Rational.le_structural_congruent(
+      a, Rational.add(c, Rational.add(Rational.add(half, outer), Rational.add(inner, half))),
+      a, Rational.add(c, Rational.add(errors, Rational.add(half, half))),
+      Rational.le_chain(a, b, c, Rational.add(inner, half), Rational.add(half, outer), ab, bc),
+      {==},
+      Equal.cong(Rational, Rational, z => Rational.add(c, z),
+        Rational.add(Rational.add(half, outer), Rational.add(inner, half)),
+        Rational.add(errors, Rational.add(half, half)),
+        Rational.errors_regroup(half, outer, inner))))
+
+def Rational.close_transitive_at(+a: Rational, +b: Rational, +c: Rational, +n: Nat, +m: Nat, +k: Nat,
+  ab: Rational.Close(a, b, Rational.dyadic(n), Rational.dyadic(1n+k)),
+  bc: Rational.Close(b, c, Rational.dyadic(1n+k), Rational.dyadic(m)),
+  forward_large: N.Natural.Le(Rational.slack(a, Rational.add(c, Rational.add(Rational.dyadic(n), Rational.dyadic(m)))), k),
+  backward_large: N.Natural.Le(Rational.slack(c, Rational.add(a, Rational.add(Rational.dyadic(m), Rational.dyadic(n)))), k)) ->
+  Rational.Close(a, c, Rational.dyadic(n), Rational.dyadic(m)):
+  (ab_forward, ab_backward) = ab
+  (bc_forward, bc_backward) = bc
+  (
+    Rational.le_of_le_add_dyadic(a, Rational.add(c, Rational.add(Rational.dyadic(n), Rational.dyadic(m))), k, forward_large,
+      Rational.le_through_dyadic(a, b, c, Rational.dyadic(n), Rational.dyadic(m), k, ab_forward, bc_forward)),
+    Rational.le_of_le_add_dyadic(c, Rational.add(a, Rational.add(Rational.dyadic(m), Rational.dyadic(n))), k, backward_large,
+      Rational.le_through_dyadic(c, b, a, Rational.dyadic(m), Rational.dyadic(n), k, bc_backward, ab_backward))
+  )
+
+def Rational.close_transitive_dyadic(+a: Rational, +c: Rational, +n: Nat, +m: Nat, middle: Nat -> Rational,
+  ab: @k: Nat -> Rational.Close(a, middle(k), Rational.dyadic(n), Rational.dyadic(k)),
+  bc: @k: Nat -> Rational.Close(middle(k), c, Rational.dyadic(k), Rational.dyadic(m))) ->
+  Rational.Close(a, c, Rational.dyadic(n), Rational.dyadic(m)):
+  +forward: Nat = Rational.slack(a, Rational.add(c, Rational.add(Rational.dyadic(n), Rational.dyadic(m))))
+  +backward: Nat = Rational.slack(c, Rational.add(a, Rational.add(Rational.dyadic(m), Rational.dyadic(n))))
+  +k: Nat = Nat.add(forward, backward)
+  Rational.close_transitive_at(a, middle(1n+k), c, n, m, k, ab(1n+k), bc(1n+k),
+    N.Natural.le_add_right(forward, backward),
+    N.Natural.le_congruent(backward, Nat.add(backward, forward), backward, k,
+      N.Natural.le_add_right(backward, forward), {==}, N.Natural.add_commutative(backward, forward)))
+
+def Rational.le_copy(+x: Rational, +y: Rational, proof: Rational.Le(x, y)) -> Rational.Le(x, y) & Rational.Le(x, y):
+  N.Natural.le_copy(Rational.left_cross(x, y), Rational.right_cross(x, y), proof)
+
+def Rational.close_weaken_with_copies(+x: Rational, +y: Rational,
+  +left_error: Rational, +right_error: Rational, +new_left_error: Rational, +new_right_error: Rational,
+  proof: Rational.Close(x, y, left_error, right_error),
+  left_le: Rational.Le(left_error, new_left_error) & Rational.Le(left_error, new_left_error),
+  right_le: Rational.Le(right_error, new_right_error) & Rational.Le(right_error, new_right_error)) ->
+  Rational.Close(x, y, new_left_error, new_right_error):
+  (forward, backward) = proof
+  (left_le_forward, left_le_backward) = left_le
+  (right_le_forward, right_le_backward) = right_le
+  (
+    Rational.le_transitive(x, Rational.add(y, Rational.add(left_error, right_error)), Rational.add(y, Rational.add(new_left_error, new_right_error)),
+      forward,
+      Rational.le_add_left(Rational.add(left_error, right_error), Rational.add(new_left_error, new_right_error), y,
+        Rational.le_add_both(left_error, new_left_error, right_error, new_right_error, left_le_forward, right_le_forward))),
+    Rational.le_transitive(y, Rational.add(x, Rational.add(right_error, left_error)), Rational.add(x, Rational.add(new_right_error, new_left_error)),
+      backward,
+      Rational.le_add_left(Rational.add(right_error, left_error), Rational.add(new_right_error, new_left_error), x,
+        Rational.le_add_both(right_error, new_right_error, left_error, new_left_error, right_le_backward, left_le_backward)))
+  )
+
+def Rational.close_weaken(+x: Rational, +y: Rational,
+  +left_error: Rational, +right_error: Rational, +new_left_error: Rational, +new_right_error: Rational,
+  proof: Rational.Close(x, y, left_error, right_error),
+  left_le: Rational.Le(left_error, new_left_error), right_le: Rational.Le(right_error, new_right_error)) ->
+  Rational.Close(x, y, new_left_error, new_right_error):
+  Rational.close_weaken_with_copies(x, y, left_error, right_error, new_left_error, new_right_error, proof,
+    Rational.le_copy(left_error, new_left_error, left_le), Rational.le_copy(right_error, new_right_error, right_le))
+
+def Rational.dyadic_decreasing(+n: Nat) -> Rational.Le(Rational.dyadic(1n+n), Rational.dyadic(n)):
+  Rational.le_replace(
+    Rational.dyadic(1n+n), Rational.dyadic(1n+n),
+    Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)), Rational.dyadic(n),
+    Rational.eq_reflexive(Rational.dyadic(1n+n)), Rational.dyadic_double(n),
+    Rational.le_self_add_nonnegative(Rational.dyadic(1n+n), Rational.dyadic(1n+n), Rational.dyadic_nonnegative(1n+n)))
+
+def Rational.neg_add(x: Rational, y: Rational) -> {Rational.neg(Rational.add(x, y)) == Rational.add(Rational.neg(x), Rational.neg(y)) : Rational}:
+  match x y:
+    case Fraction{xp, xn, xd} Fraction{yp, yn, yd}:
+      {==}
+
+def Rational.add_cancel_neg(+x: Rational, +error: Rational) ->
+  Rational.Eq(Rational.add(Rational.add(x, Rational.neg(error)), error), x):
+  Rational.eq_structural_congruent(
+    Rational.add(x, Rational.add(Rational.neg(error), error)), Rational.add(x, Rational.zero()),
+    Rational.add(Rational.add(x, Rational.neg(error)), error), x,
+    Rational.eq_add_left(Rational.add(Rational.neg(error), error), Rational.zero(), x,
+      Rational.eq_structural_congruent(
+        Rational.add(error, Rational.neg(error)), Rational.zero(),
+        Rational.add(Rational.neg(error), error), Rational.zero(),
+        Rational.add_neg_self(error), Rational.add_commutative(error, Rational.neg(error)), {==})),
+    Equal.sym(Rational, Rational.add(Rational.add(x, Rational.neg(error)), error), Rational.add(x, Rational.add(Rational.neg(error), error)),
+      Rational.add_associative(x, Rational.neg(error), error)),
+    Rational.add_zero(x))
+
+def Rational.le_shift_neg(+x: Rational, +y: Rational, +error: Rational,
+  proof: Rational.Le(y, Rational.add(x, error))) ->
+  Rational.Le(Rational.neg(x), Rational.add(Rational.neg(y), error)):
+  Rational.le_replace(
+    Rational.add(Rational.add(Rational.neg(x), Rational.neg(error)), error), Rational.neg(x),
+    Rational.add(Rational.neg(y), error), Rational.add(Rational.neg(y), error),
+    Rational.add_cancel_neg(Rational.neg(x), error),
+    Rational.eq_reflexive(Rational.add(Rational.neg(y), error)),
+    Rational.le_add_right(Rational.add(Rational.neg(x), Rational.neg(error)), Rational.neg(y), error,
+      Rational.le_structural_congruent(
+        Rational.neg(Rational.add(x, error)), Rational.neg(y),
+        Rational.add(Rational.neg(x), Rational.neg(error)), Rational.neg(y),
+        Rational.le_negated(y, Rational.add(x, error), proof),
+        Rational.neg_add(x, error), {==})))
+
+def Rational.close_negated(+x: Rational, +y: Rational, +left_error: Rational, +right_error: Rational,
+  proof: Rational.Close(x, y, left_error, right_error)) ->
+  Rational.Close(Rational.neg(x), Rational.neg(y), left_error, right_error):
+  (forward, backward) = proof
+  (
+    Rational.le_structural_congruent(
+      Rational.neg(x), Rational.add(Rational.neg(y), Rational.add(right_error, left_error)),
+      Rational.neg(x), Rational.add(Rational.neg(y), Rational.add(left_error, right_error)),
+      Rational.le_shift_neg(x, y, Rational.add(right_error, left_error), backward),
+      {==},
+      Equal.cong(Rational, Rational, z => Rational.add(Rational.neg(y), z),
+        Rational.add(right_error, left_error), Rational.add(left_error, right_error),
+        Rational.add_commutative(right_error, left_error))),
+    Rational.le_structural_congruent(
+      Rational.neg(y), Rational.add(Rational.neg(x), Rational.add(left_error, right_error)),
+      Rational.neg(y), Rational.add(Rational.neg(x), Rational.add(right_error, left_error)),
+      Rational.le_shift_neg(y, x, Rational.add(left_error, right_error), forward),
+      {==},
+      Equal.cong(Rational, Rational, z => Rational.add(Rational.neg(x), z),
+        Rational.add(left_error, right_error), Rational.add(right_error, left_error),
+        Rational.add_commutative(left_error, right_error)))
+  )
+
+def Rational.close_of_bounds_dyadic(+x: Rational, +y: Rational, +n: Nat, +m: Nat,
+  bounds: Rational.Le(x, y) & Rational.Le(y, x)) ->
+  Rational.Close(x, y, Rational.dyadic(n), Rational.dyadic(m)):
+  (below, above) = bounds
+  (
+    Rational.le_transitive(x, y, Rational.add(y, Rational.add(Rational.dyadic(n), Rational.dyadic(m))), below,
+      Rational.le_self_add_nonnegative(y, Rational.add(Rational.dyadic(n), Rational.dyadic(m)),
+        Rational.add_nonnegative(Rational.dyadic(n), Rational.dyadic(m), Rational.dyadic_nonnegative(n), Rational.dyadic_nonnegative(m)))),
+    Rational.le_transitive(y, x, Rational.add(x, Rational.add(Rational.dyadic(m), Rational.dyadic(n))), above,
+      Rational.le_self_add_nonnegative(x, Rational.add(Rational.dyadic(m), Rational.dyadic(n)),
+        Rational.add_nonnegative(Rational.dyadic(m), Rational.dyadic(n), Rational.dyadic_nonnegative(m), Rational.dyadic_nonnegative(n))))
+  )
+
+def Rational.close_of_eq_dyadic(+x: Rational, +y: Rational, +n: Nat, +m: Nat, equal: Rational.Eq(x, y)) ->
+  Rational.Close(x, y, Rational.dyadic(n), Rational.dyadic(m)):
+  Rational.close_of_bounds_dyadic(x, y, n, m, Rational.eq_both_le(x, y, equal))
+
+def Rational.le_add_close_bounds(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  +left_error: Rational, +right_error: Rational, +other_left_error: Rational, +other_right_error: Rational,
+  ab: Rational.Le(a, Rational.add(b, Rational.add(left_error, right_error))),
+  cd: Rational.Le(c, Rational.add(d, Rational.add(other_left_error, other_right_error)))) ->
+  Rational.Le(Rational.add(a, c), Rational.add(Rational.add(b, d),
+    Rational.add(Rational.add(left_error, other_left_error), Rational.add(right_error, other_right_error)))):
+  Rational.le_structural_congruent(
+    Rational.add(a, c),
+    Rational.add(Rational.add(b, Rational.add(left_error, right_error)), Rational.add(d, Rational.add(other_left_error, other_right_error))),
+    Rational.add(a, c),
+    Rational.add(Rational.add(b, d), Rational.add(Rational.add(left_error, other_left_error), Rational.add(right_error, other_right_error))),
+    Rational.le_add_both(a, Rational.add(b, Rational.add(left_error, right_error)), c, Rational.add(d, Rational.add(other_left_error, other_right_error)), ab, cd),
+    {==},
+    Equal.trans(Rational,
+      Rational.add(Rational.add(b, Rational.add(left_error, right_error)), Rational.add(d, Rational.add(other_left_error, other_right_error))),
+      Rational.add(Rational.add(b, d), Rational.add(Rational.add(left_error, right_error), Rational.add(other_left_error, other_right_error))),
+      Rational.add(Rational.add(b, d), Rational.add(Rational.add(left_error, other_left_error), Rational.add(right_error, other_right_error))),
+      Rational.add_middle_commute(b, Rational.add(left_error, right_error), d, Rational.add(other_left_error, other_right_error)),
+      Equal.cong(Rational, Rational, z => Rational.add(Rational.add(b, d), z),
+        Rational.add(Rational.add(left_error, right_error), Rational.add(other_left_error, other_right_error)),
+        Rational.add(Rational.add(left_error, other_left_error), Rational.add(right_error, other_right_error)),
+        Rational.add_middle_commute(left_error, right_error, other_left_error, other_right_error))))
+
+def Rational.close_add(+a: Rational, +b: Rational, +c: Rational, +d: Rational,
+  +left_error: Rational, +right_error: Rational, +other_left_error: Rational, +other_right_error: Rational,
+  ab: Rational.Close(a, b, left_error, right_error),
+  cd: Rational.Close(c, d, other_left_error, other_right_error)) ->
+  Rational.Close(Rational.add(a, c), Rational.add(b, d),
+    Rational.add(left_error, other_left_error), Rational.add(right_error, other_right_error)):
+  (ab_forward, ab_backward) = ab
+  (cd_forward, cd_backward) = cd
+  (
+    Rational.le_add_close_bounds(a, b, c, d, left_error, right_error, other_left_error, other_right_error, ab_forward, cd_forward),
+    Rational.le_add_close_bounds(b, a, d, c, right_error, left_error, other_right_error, other_left_error, ab_backward, cd_backward)
+  )
+
+def Rational.dyadic_three_left(+n: Nat) ->
+  Rational.Eq(Rational.add(Rational.add(Rational.dyadic(2n+n), Rational.dyadic(2n+n)), Rational.dyadic(1n+n)), Rational.dyadic(n)):
+  Rational.eq_transitive(
+    Rational.add(Rational.add(Rational.dyadic(2n+n), Rational.dyadic(2n+n)), Rational.dyadic(1n+n)),
+    Rational.add(Rational.dyadic(1n+n), Rational.dyadic(1n+n)),
+    Rational.dyadic(n),
+    Rational.eq_add_right(Rational.add(Rational.dyadic(2n+n), Rational.dyadic(2n+n)), Rational.dyadic(1n+n), Rational.dyadic(1n+n),
+      Rational.dyadic_double(1n+n)),
+    Rational.dyadic_double(n))
+
+def Rational.dyadic_three_right(+m: Nat) ->
+  Rational.Eq(Rational.add(Rational.add(Rational.dyadic(1n+m), Rational.dyadic(2n+m)), Rational.dyadic(2n+m)), Rational.dyadic(m)):
+  Rational.eq_structural_congruent(
+    Rational.add(Rational.dyadic(1n+m), Rational.add(Rational.dyadic(2n+m), Rational.dyadic(2n+m))), Rational.dyadic(m),
+    Rational.add(Rational.add(Rational.dyadic(1n+m), Rational.dyadic(2n+m)), Rational.dyadic(2n+m)), Rational.dyadic(m),
+    Rational.eq_transitive(
+      Rational.add(Rational.dyadic(1n+m), Rational.add(Rational.dyadic(2n+m), Rational.dyadic(2n+m))),
+      Rational.add(Rational.dyadic(1n+m), Rational.dyadic(1n+m)),
+      Rational.dyadic(m),
+      Rational.eq_add_left(Rational.add(Rational.dyadic(2n+m), Rational.dyadic(2n+m)), Rational.dyadic(1n+m), Rational.dyadic(1n+m),
+        Rational.dyadic_double(1n+m)),
+      Rational.dyadic_double(m)),
+    Equal.sym(Rational,
+      Rational.add(Rational.add(Rational.dyadic(1n+m), Rational.dyadic(2n+m)), Rational.dyadic(2n+m)),
+      Rational.add(Rational.dyadic(1n+m), Rational.add(Rational.dyadic(2n+m), Rational.dyadic(2n+m))),
+      Rational.add_associative(Rational.dyadic(1n+m), Rational.dyadic(2n+m), Rational.dyadic(2n+m))),
+    {==})

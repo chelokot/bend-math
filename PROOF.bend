@@ -263,8 +263,35 @@ def Laws.real_rational_embedding(rational):
 def Laws.real_rational_embedding_respects_equality(a, b, equality):
   R.Real.of_rational_eq(a, b, equality)
 
+def Laws.real_addition(x, y):
+  R.Real.add(x, y)
+
+def Laws.real_add_respects_eq(x, y, other_x, other_y, x_equal, y_equal):
+  R.Real.add_respects_eq(x, y, other_x, other_y, x_equal, y_equal)
+
 def Laws.real_eq_reflexive(x):
   R.Real.eq_reflexive(x)
 
 def Laws.real_eq_symmetric(x, y, proof):
   R.Real.eq_symmetric(x, y, proof)
+
+def Laws.real_eq_transitive(x, y, z, xy, yz):
+  R.Real.eq_transitive(x, y, z, xy, yz)
+
+def Laws.real_add_commutative(x, y):
+  R.Real.add_commutative(x, y)
+
+def Laws.real_add_associative(x, y, z):
+  R.Real.add_associative(x, y, z)
+
+def Laws.real_add_zero(x):
+  R.Real.add_zero(x)
+
+def Laws.real_negation(x):
+  R.Real.neg(x)
+
+def Laws.real_neg_respects_eq(x, y, equal):
+  R.Real.neg_respects_eq(x, y, equal)
+
+def Laws.real_add_neg(x):
+  R.Real.add_neg(x)

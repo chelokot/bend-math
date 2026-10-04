@@ -15,21 +15,22 @@ The final real-number model must cover arbitrary real coordinates, not just
 named computable constants. Floating-point values and unproved field axioms
 cannot substitute for that model.
 
-`Real.bend` currently represents a rational-valued regular Cauchy sequence,
-with equality defined by two directed cross-precision bounds. Bend checks that
-every rational has a constant real representation, equivalent rational
-representations give equivalent reals, and real equality is reflexive and symmetric.
-Transitivity, field operations, order, completeness, and compatibility with
-the rational quotient are still open work. The checked definitions alone do
-not license any theorem about square packing.
+`Real.bend` represents a rational-valued regular Cauchy sequence, with
+equality defined by two directed cross-precision bounds. Bend checks that every
+rational has a constant real representation, equivalent rational
+representations give equivalent reals, real equality is an equivalence
+relation, and the reals with addition and negation form an abelian group up
+to that equality. Multiplication, order,
+completeness, and compatibility with the rational quotient are still open
+work. The checked definitions alone do not license any theorem about square
+packing.
 
-There is also a representation-level obstacle in Bend 2.0.25. A Cauchy real
-contains a function from precision to rational approximations, so its type is
-`Type`, not duplicable `Data`. The checker rejects using that function both to
-compute an output sequence and to prove its regularity. Erasing the regularity
-field does not solve this: its proof cannot then be used to establish even
-reflexivity of real equality. The rational error estimates needed for addition
-are checked, but a sound way to lift them to arbitrary Cauchy reals remains open.
+Bend never copies a function, so a proof cannot apply the approximation
+function of a real a second time after it has gone into a new sequence. The
+regularity field therefore returns its two approximations as ordinary rational
+values, together with equalities to the function's results. Proofs compute
+with those copies and mention the function only inside types, where it may
+occur freely.
 
 `Rational.bend` stores a numerator as the difference of two naturals and a
 strictly positive denominator as one plus a natural. Different records can
@@ -45,8 +46,7 @@ The next proof boundaries are:
    both distributive laws are proved. A nonzero rational has a checked
    multiplicative inverse, including compatibility with equivalent
    representations. Products of nonnegative rationals are nonnegative.
-2. Prove `Real.Eq` transitive and lift addition, multiplication, order and
-   limits to Cauchy representations, with all operations respecting `Real.Eq`.
+2. Lift multiplication, order and limits to Cauchy representations.
 3. Prove completeness and construct square roots with their defining laws.
 4. Formalize only the extra exact inequalities required by the packing
    theorems. The [archive's Bend migration branch](https://github.com/chelokot/square-packing-archive/tree/rewrite/bend2-formal-archive)
@@ -57,11 +57,12 @@ and the published [`bend.how` examples](https://bend.how/lib/). Their current
 `Real` example supports a few named recipes rather than arbitrary reals. No
 third-party source code is included here.
 
-Check the current laws with Bend 2.0.25 at commit
-`26659268dbdf411696bf90d28e722783dceae0f8`:
+Check the current laws with Bend 2.0.35 at commit
+`79df8d9c40722ee9507a1e253f283b51025f9d6c`. `--verdict` rechecks every proof
+with Bend's kernel, which is proved in Lean and needs Lean 4.34.0:
 
 ```sh
-bun /path/to/bend/bend2/main.ts PROOF.bend --check-only
+bun /path/to/bend/bend2/main.ts PROOF.bend --verdict
 ```
 
 `LAWS.bend` is the review boundary: adding a theorem requires writing its
