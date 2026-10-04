@@ -1,6 +1,6 @@
 import Base
 
-def Natural.Le(a: Nat, b: Nat) -> Type:
+def Natural.Le(a: Nat, b: Nat) -> Kind(&2):
   match a b:
     case 0n 0n:
       Unit
@@ -1164,13 +1164,13 @@ def Natural.le_of_scaled_le(+s: Nat, +left: Nat, +right: Nat, +slack: Nat,
   small: Natural.Le(slack, s)) -> Natural.Le(left, right):
   Natural.le_of_scaled_order(s, left, right, slack, Natural.le_total(left, right), scaled, small)
 
-def Natural.le_copy(+a: Nat, +b: Nat, proof: Natural.Le(a, b)) -> Natural.Le(a, b) & Natural.Le(a, b):
+def Natural.le_decidable(a: Nat, b: Nat) -> Or(Natural.Le(a, b), Natural.Le(a, b) -> Empty):
   match a b:
     case 0n 0n:
-      (Unit{}, Unit{})
+      Inl{Unit{}}
     case 0n 1n+bp:
-      (Unit{}, Unit{})
+      Inl{Unit{}}
     case 1n+ap 0n:
-      match proof:
+      Inr{proof => proof}
     case 1n+ap 1n+bp:
-      Natural.le_copy(ap, bp, proof)
+      Natural.le_decidable(ap, bp)

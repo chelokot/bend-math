@@ -4,6 +4,7 @@ import ./Natural.bend as N
 import ./Integer.bend as Z
 import ./Rational.bend as Q
 import ./Real.bend as R
+import ./RationalField.bend as F
 
 def Laws.natural_le_reflexive(n):
   N.Natural.le_reflexive(n)
@@ -295,3 +296,6 @@ def Laws.real_neg_respects_eq(x, y, equal):
 
 def Laws.real_add_neg(x):
   R.Real.add_neg(x)
+
+def Laws.rational_ordered_field():
+  F.RationalField.field()

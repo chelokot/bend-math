@@ -32,6 +32,14 @@ values, together with equalities to the function's results. Proofs compute
 with those copies and mention the function only inside types, where it may
 occur freely.
 
+`Field.bend` states an ordered field as a record that theorems take as a `~`
+template, so its operations and axioms may be used any number of times. Every
+axiom is phrased through the order, with equality meaning `a ≤ b` and `b ≤ a`.
+The trivial one-element structure therefore models the record, which lets the
+proven kernel check generic theorems, and `RationalField.bend` proves that the
+rationals satisfy every axiom. A theorem proved for every such field holds for
+the real numbers in particular.
+
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
 sorted monomials and is accepted only when the normal forms are identical. Its
