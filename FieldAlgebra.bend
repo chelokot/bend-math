@@ -19,6 +19,9 @@ def Algebra.neg(~F: Kind(&2), ~field: K.Field<F>, a: F) -> F:
 def Algebra.mul(~F: Kind(&2), ~field: K.Field<F>, a: F, b: F) -> F:
   K.Field.mul(F, field)(a, b)
 
+def Algebra.inverse(~F: Kind(&2), ~field: K.Field<F>, a: F) -> F:
+  K.Field.inverse(F, field)(a)
+
 def Algebra.le(~F: Kind(&2), ~field: K.Field<F>, +a: F, +b: F) -> Kind(&2):
   K.Field.le(F, field)(a, b)
 
@@ -137,3 +140,6 @@ def Algebra.mul_zero(~F: Kind(&2), ~field: K.Field<F>, +a: F) -> Algebra.Same(~F
 
 def Algebra.zero_mul(~F: Kind(&2), ~field: K.Field<F>, +a: F) -> Algebra.Same(~F, ~field, Algebra.mul(~F, ~field, Algebra.zero(~F, ~field), a), Algebra.zero(~F, ~field)):
   Algebra.same_transitive(~F, ~field, Algebra.mul(~F, ~field, Algebra.zero(~F, ~field), a), Algebra.mul(~F, ~field, a, Algebra.zero(~F, ~field)), Algebra.zero(~F, ~field), Algebra.mul_commutes(~F, ~field, Algebra.zero(~F, ~field), a), Algebra.mul_zero(~F, ~field, a))
+
+def Algebra.mul_inverse(~F: Kind(&2), ~field: K.Field<F>, +a: F, positive: Algebra.le(~F, ~field, a, Algebra.zero(~F, ~field)) -> Empty) -> Algebra.Same(~F, ~field, Algebra.mul(~F, ~field, a, Algebra.inverse(~F, ~field, a)), Algebra.one(~F, ~field)):
+  K.Field.mul_inverse(F, field)(a, positive)
