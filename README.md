@@ -48,6 +48,20 @@ checked for every field. `FieldOrder.bend` adds the order facts the packing
 proofs use: adding inequalities, negation reversing the order, and the
 embedding of the naturals being nonnegative and monotone.
 
+`Certificate.bend` proves inequalities of the form `0 ≤ goal` from facts
+`0 ≤ fact` and equations `equation = 0`. A certificate writes `(1 + d) · goal`
+as a sum of natural multiples of fact products times squares, plus polynomial
+multiples of equations; Bend checks the identity with `FieldRing.equal` and
+each term's sign. `tools/certificate.py` searches for such a certificate with
+an exact linear program and prints it as Bend terms:
+
+```sh
+python3 tools/certificate.py problem.json
+```
+
+where `problem.json` lists `names`, `facts`, `equations`, `goal` and optional
+`squares`, each as a polynomial over the names.
+
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
 sorted monomials and is accepted only when the normal forms are identical. Its
