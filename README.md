@@ -32,6 +32,12 @@ values, together with equalities to the function's results. Proofs compute
 with those copies and mention the function only inside types, where it may
 occur freely.
 
+`Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
+as expression trees over a list of values; `Ring.equal` normalizes them to
+sorted monomials and is accepted only when the normal forms are identical. Its
+soundness theorem is checked, so a wrong identity cannot pass, and the failing
+check prints the two different normal forms.
+
 `Rational.bend` stores a numerator as the difference of two naturals and a
 strictly positive denominator as one plus a natural. Different records can
 denote the same rational; equality and order use cross multiplication. This

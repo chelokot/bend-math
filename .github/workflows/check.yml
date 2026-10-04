@@ -27,6 +27,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - run: bun bend/bend2/main.ts PROOF.bend --verdict
       - run: bun bend/bend2/main.ts tests/arithmetic.bend --verdict
+      - run: bun bend/bend2/main.ts tests/ring.bend --verdict
       - name: Reject a non-Cauchy sequence
         run: |
           if output=$(bun bend/bend2/main.ts tests/non_cauchy.bend --check-only 2>&1); then
