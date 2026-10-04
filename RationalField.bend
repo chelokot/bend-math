@@ -16,6 +16,11 @@ def RationalField.mul_respects(+a: Q.Rational, +b: Q.Rational, +c: Q.Rational, b
   Q.Rational.eq_both_le(Q.Rational.mul(a, c), Q.Rational.mul(b, c),
     Q.Rational.eq_mul_right(a, b, c, Q.Rational.le_antisymmetric(a, b, ab, ba)))
 
+def RationalField.mul_inverse(+a: Q.Rational, positive: Q.Rational.Le(a, Q.Rational.zero()) -> Empty) ->
+  Q.Rational.Le(Q.Rational.mul(a, Q.Rational.inverse(a)), Q.Rational.one()) & Q.Rational.Le(Q.Rational.one(), Q.Rational.mul(a, Q.Rational.inverse(a))):
+  Q.Rational.eq_both_le(Q.Rational.mul(a, Q.Rational.inverse(a)), Q.Rational.one(),
+    Q.Rational.inverse_cancel(a, equal => positive(Q.Rational.eq_implies_le(a, Q.Rational.zero(), equal))))
+
 def RationalField.field() -> K.Field<Q.Rational>:
   K.Field{
     Q.Rational.zero(),
@@ -24,6 +29,7 @@ def RationalField.field() -> K.Field<Q.Rational>:
     a => b => Q.Rational.add(a, b),
     a => Q.Rational.neg(a),
     a => b => Q.Rational.mul(a, b),
+    a => Q.Rational.inverse(a),
     +a => +b => Q.Rational.Le(a, b),
     +a => Q.Rational.le_reflexive(a),
     +a => +b => +c => ab => bc => Q.Rational.le_transitive(a, b, c, ab, bc),
@@ -43,5 +49,6 @@ def RationalField.field() -> K.Field<Q.Rational>:
     +a => RationalField.both_le_of_equal(Q.Rational.mul(a, Q.Rational.one()), a, Q.Rational.mul_one(a)),
     +a => +b => +c => Q.Rational.eq_both_le(Q.Rational.mul(a, Q.Rational.add(b, c)), Q.Rational.add(Q.Rational.mul(a, b), Q.Rational.mul(a, c)), Q.Rational.mul_add_distributive(a, b, c)),
     Unit{},
-    (Unit{}, Unit{})
+    (Unit{}, Unit{}),
+    +a => positive => RationalField.mul_inverse(a, positive)
   }
