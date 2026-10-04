@@ -182,7 +182,56 @@ def poly_expr(p):
     return result
 
 
+def supports(columns, target):
+    """Column sets that a floating-point solver uses for target under a few objectives; empty when it finds none."""
+    import numpy
+    from scipy.optimize import linprog
+    rows = sorted({m for column in columns for m in column} | set(target))
+    index = {row: i for i, row in enumerate(rows)}
+    matrix = numpy.zeros((len(rows), len(columns)))
+    for j, column in enumerate(columns):
+        for m, c in column.items():
+            matrix[index[m], j] = float(c)
+    vector = numpy.array([float(target.get(row, 0)) for row in rows])
+    sizes = numpy.array([float(sum(len(str(c)) for c in column.values())) for column in columns])
+    random = numpy.random.default_rng(len(columns))
+    found = []
+    for objective in [numpy.ones(len(columns)), sizes, numpy.zeros(len(columns))] + [random.random(len(columns)) for _ in range(3)]:
+        result = linprog(objective, A_eq=matrix, b_eq=vector, bounds=(0, None), method="highs")
+        if result.status != 0:
+            return found
+        chosen = [j for j, w in enumerate(result.x) if w > 1e-9]
+        if chosen not in found:
+            found.append(chosen)
+    return found
+
+
+def size(weights):
+    return max([w.numerator for w in weights if w] + [lcm(w.denominator for w in weights)])
+
+
 def feasible(columns, target):
+    """Nonnegative rational weights for columns summing to target, preferring small numbers when a fast solver is installed."""
+    try:
+        candidates = supports(columns, target)
+    except ImportError:
+        return exact_feasible(columns, target)
+    best = None
+    for chosen in candidates:
+        weights = exact_feasible([columns[j] for j in chosen], target)
+        if weights is None:
+            continue
+        full = [Fraction(0)] * len(columns)
+        for j, w in zip(chosen, weights):
+            full[j] = w
+        if best is None or size(full) < size(best):
+            best = full
+    if best is None and candidates:
+        best = exact_feasible(columns, target)
+    return best
+
+
+def exact_feasible(columns, target):
     """Exact phase-one simplex: nonnegative weights for columns summing to target."""
     rows = sorted({m for column in columns for m in column} | set(target))
     count = len(columns)
@@ -355,7 +404,10 @@ def search(names, facts, equations, goal, squares, products, extra=1):
     equation_polys = [poly(parse(e, names), count) for e in equations]
     goal_poly = poly(parse(goal, names), count)
     found = reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, products)
-    if found is None:
+    key = monomial_key(ranking(equation_polys, count))
+    leading = [max(e, key=key) for e in equation_polys]
+    coprime = all(not any(a and b for a, b in zip(first, second)) for i, first in enumerate(leading) for second in leading[i + 1:])
+    if found is None and not coprime:
         found = expanded_search(count, fact_polys, square_polys, equation_polys, goal_poly, products, extra)
     if found is None:
         return None

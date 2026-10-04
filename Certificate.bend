@@ -8,6 +8,16 @@ import ./Ring.bend as G
 type Certificate.Both<-L: Kind(&2), -M: Kind(&2)> is Data:
   Both{first: L, second: M}
 
+def Certificate.first(-L: Kind(&2), -M: Kind(&2), both: Certificate.Both<L, M>) -> L:
+  match both:
+    case Both{first, second}:
+      first
+
+def Certificate.second(-L: Kind(&2), -M: Kind(&2), both: Certificate.Both<L, M>) -> M:
+  match both:
+    case Both{first, second}:
+      second
+
 type Certificate.Exprs is Data:
   NoExprs{}
   MoreExprs{head: R.FieldRing.Expr, tail: Certificate.Exprs}

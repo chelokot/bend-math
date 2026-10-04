@@ -807,3 +807,10 @@ def Bits.apart_single(+x: Bool, +y: Bool, apart: Bits.Holds(Bool.not(Bool.and(x,
     Equal.cong(Bool, Bool, Bool.not, Bool.and(x, y), Bool.or(Bool.and(x, y), False{}),
       Equal.sym(Bool, Bool.or(Bool.and(x, y), False{}), Bool.and(x, y), Bits.or_false(Bool.and(x, y)))),
     apart)
+
+def Bits.not_both(a: Bool, +b: Bool, none: Bits.Holds(Bool.not(Bool.and(a, b)))) -> Or(Bits.Holds(Bool.not(a)), Bits.Holds(Bool.not(b))):
+  match a:
+    case False{}:
+      Inl{Unit{}}
+    case True{}:
+      Inr{none}
