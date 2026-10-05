@@ -226,8 +226,6 @@ def feasible(columns, target):
             full[j] = w
         if best is None or size(full) < size(best):
             best = full
-    if best is None and candidates:
-        best = exact_feasible(columns, target)
     return best
 
 
@@ -317,6 +315,23 @@ def reduce(p, equation_polys, lead_monomials, key):
     return remainder, quotients
 
 
+class Product:
+    """A product of facts times a square, expanded only when needed."""
+
+    def __init__(self, fact_polys, square_polys, chosen, k):
+        self.parts = (fact_polys, square_polys, chosen, k)
+        self.value = None
+
+    def items(self):
+        if self.value is None:
+            fact_polys, square_polys, chosen, k = self.parts
+            p = mul(square_polys[k], square_polys[k])
+            for index in chosen:
+                p = mul(p, fact_polys[index])
+            self.value = p
+        return self.value.items()
+
+
 def candidates_of(fact_polys, square_polys, products):
     out = []
     for size in range(products + 1):
@@ -324,11 +339,7 @@ def candidates_of(fact_polys, square_polys, products):
             for k, square in enumerate(square_polys):
                 if size + (k > 0) > products:
                     continue
-                p = mul(square, square)
-                for index in chosen:
-                    p = mul(p, fact_polys[index])
-                if p:
-                    out.append((chosen, k, p))
+                out.append((chosen, k, Product(fact_polys, square_polys, chosen, k)))
     return out
 
 
@@ -342,9 +353,17 @@ def lcm(values):
 def reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, products):
     key = monomial_key(ranking(equation_polys, count))
     lead_monomials = [max(e, key=key) for e in equation_polys]
-    goal_form, _ = reduce(goal_poly, equation_polys, lead_monomials, key)
+    normal = lambda p: reduce(p, equation_polys, lead_monomials, key)[0]
+    goal_form = normal(goal_poly)
+    fact_forms = [normal(f) for f in fact_polys]
+    square_forms = [normal(mul(q, q)) for q in square_polys]
     candidates = candidates_of(fact_polys, square_polys, products)
-    forms = [reduce(p, equation_polys, lead_monomials, key)[0] for _, _, p in candidates]
+    forms = []
+    for chosen, k, _ in candidates:
+        form = square_forms[k]
+        for index in chosen:
+            form = normal(mul(form, fact_forms[index]))
+        forms.append(form)
     weights = feasible(forms, goal_form)
     if weights is None:
         return None
@@ -366,7 +385,7 @@ def reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, p
 
 
 def expanded_search(count, fact_polys, square_polys, equation_polys, goal_poly, products, extra):
-    candidates = [("product", chosen, k, p) for chosen, k, p in candidates_of(fact_polys, square_polys, products)]
+    candidates = [("product", chosen, k, dict(p.items())) for chosen, k, p in candidates_of(fact_polys, square_polys, products)]
     top = max([degree(c[3]) for c in candidates] + [degree(goal_poly)]) + extra
     for j, e in enumerate(equation_polys):
         for total in range(top - degree(e) + 1):
@@ -396,7 +415,7 @@ def expanded_search(count, fact_polys, square_polys, equation_polys, goal_poly, 
     return scale, terms, multipliers
 
 
-def search(names, facts, equations, goal, squares, products, extra=1):
+def search(names, facts, equations, goal, squares, products, extra=0):
     count = len(names)
     fact_polys = [poly(parse(f, names), count) for f in facts]
     square_exprs = [Num(1)] + [parse(s, names) for s in squares]
@@ -404,10 +423,7 @@ def search(names, facts, equations, goal, squares, products, extra=1):
     equation_polys = [poly(parse(e, names), count) for e in equations]
     goal_poly = poly(parse(goal, names), count)
     found = reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, products)
-    key = monomial_key(ranking(equation_polys, count))
-    leading = [max(e, key=key) for e in equation_polys]
-    coprime = all(not any(a and b for a, b in zip(first, second)) for i, first in enumerate(leading) for second in leading[i + 1:])
-    if found is None and not coprime:
+    if found is None and extra:
         found = expanded_search(count, fact_polys, square_polys, equation_polys, goal_poly, products, extra)
     if found is None:
         return None

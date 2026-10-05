@@ -18,6 +18,10 @@ class CertificateSearch(unittest.TestCase):
                                    ["5*cosine - 4", "5*sine - 3"], 2)
         self.assertIsNotNone(found)
 
+    def test_defined_variable_is_reduced_away(self):
+        found = certificate.search(["half"], [], ["half + half - 1"], "half", [], 1)
+        self.assertEqual(found[0], 1)
+
     def test_false_goal_has_no_certificate(self):
         self.assertIsNone(certificate.search(["x"], ["x"], [], "1 - x", [], 2))
 

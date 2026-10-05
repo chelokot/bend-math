@@ -113,20 +113,6 @@ def Bits.either(a: Bool, +b: Bool, any: Bits.Holds(Bool.or(a, b))) -> Or(Bits.Ho
     case True{}:
       Inl{Unit{}}
 
-def Bits.neither_left(a: Bool, +b: Bool, none: Bits.Holds(Bool.not(Bool.or(a, b)))) -> Bits.Holds(Bool.not(a)):
-  match a:
-    case False{}:
-      Unit{}
-    case True{}:
-      match none:
-
-def Bits.neither_right(a: Bool, +b: Bool, none: Bits.Holds(Bool.not(Bool.or(a, b)))) -> Bits.Holds(Bool.not(b)):
-  match a:
-    case False{}:
-      none
-    case True{}:
-      match none:
-
 def Bits.neither(a: Bool, +b: Bool, first: Bits.Holds(Bool.not(a)), second: Bits.Holds(Bool.not(b))) -> Bits.Holds(Bool.not(Bool.or(a, b))):
   match a:
     case False{}:
@@ -683,17 +669,6 @@ def Bits.not_both_first(a: Bool, +b: Bool, +c: Bool, none: Bits.Holds(Bool.not(c
         case True{}:
           none
 
-def Bits.not_both_middle(a: Bool, +b: Bool, +c: Bool, none: Bits.Holds(Bool.not(b))) -> Bits.Holds(Bool.not(Bool.and(a, Bool.and(b, c)))):
-  match a:
-    case False{}:
-      Unit{}
-    case True{}:
-      match b:
-        case False{}:
-          Unit{}
-        case True{}:
-          match none:
-
 def Bits.apart_at_step(x: Bool, y: Bool, +xs: List<&2, Bool>, +ys: List<&2, Bool>, index: Nat,
   apart: Bits.Holds(Bool.not(Bool.or(Bool.and(x, y), Bits.meet(xs, ys)))),
   rest: @previous: Nat -> Bits.Holds(Bool.not(Bits.meet(xs, ys))) -> Bits.Holds(Bool.not(Bool.and(Bits.get(xs, previous), Bits.get(ys, previous))))) ->
@@ -741,26 +716,12 @@ def Bits.le_holds(a: Nat, b: Nat, holds: Bits.Holds(Nat.is_le(a, b))) -> N.Natur
     case 1n+ap 1n+bp:
       Bits.le_holds(ap, bp, holds)
 
-def Bits.at_most_one(b: Bool) -> N.Natural.Le(Bits.n(b), 1n):
-  match b:
-    case False{}:
-      Unit{}
-    case True{}:
-      Unit{}
-
 def Bits.one_of(b: Bool, holds: Bits.Holds(b)) -> N.Natural.Le(1n, Bits.n(b)):
   match b:
     case False{}:
       match holds:
     case True{}:
       Unit{}
-
-def Bits.none_of(b: Bool, holds: Bits.Holds(Bool.not(b))) -> N.Natural.Le(Bits.n(b), 0n):
-  match b:
-    case False{}:
-      Unit{}
-    case True{}:
-      match holds:
 
 def Bits.or_at_most(a: Bool, +b: Bool) -> N.Natural.Le(Bits.n(Bool.or(a, b)), Nat.add(Bits.n(a), Bits.n(b))):
   match a b:
@@ -794,13 +755,6 @@ def Bits.not_and_first(a: Bool, +b: Bool, none: Bits.Holds(Bool.not(a))) -> Bits
     case True{}:
       match none:
 
-def Bits.not_first_of(a: Bool, +b: Bool, apart: Bits.Holds(Bool.not(Bool.and(a, b))), holds: Bits.Holds(b)) -> Bits.Holds(Bool.not(a)):
-  match a:
-    case False{}:
-      Unit{}
-    case True{}:
-      Bits.never(b, holds, apart)
-
 def Bits.apart_single(+x: Bool, +y: Bool, apart: Bits.Holds(Bool.not(Bool.and(x, y)))) ->
   Bits.Holds(Bool.not(Bits.meet(Con{x, Nil{}}, Con{y, Nil{}}))):
   Bits.transport(Bool.not(Bool.and(x, y)), Bool.not(Bool.or(Bool.and(x, y), False{})),
@@ -814,3 +768,33 @@ def Bits.not_both(a: Bool, +b: Bool, none: Bits.Holds(Bool.not(Bool.and(a, b))))
       Inl{Unit{}}
     case True{}:
       Inr{none}
+
+def Bits.implies(a: Bool, +b: Bool, +x: Bool, conclude: Bits.Holds(a) -> Bits.Holds(b) -> Bits.Holds(x)) ->
+  Bits.Holds(Bool.or(Bool.not(Bool.and(a, b)), x)):
+  match a b:
+    case False{} False{}:
+      Unit{}
+    case False{} True{}:
+      Unit{}
+    case True{} False{}:
+      Unit{}
+    case True{} True{}:
+      conclude(Unit{}, Unit{})
+
+def Bits.not_of(a: Bool, refute: Bits.Holds(a) -> Empty) -> Bits.Holds(Bool.not(a)):
+  match a:
+    case False{}:
+      Unit{}
+    case True{}:
+      refute(Unit{})
+
+def Bits.never_both(a: Bool, +b: Bool, refute: Bits.Holds(a) -> Bits.Holds(b) -> Empty) -> Bits.Holds(Bool.not(Bool.and(a, b))):
+  match a b:
+    case False{} False{}:
+      Unit{}
+    case False{} True{}:
+      Unit{}
+    case True{} False{}:
+      Unit{}
+    case True{} True{}:
+      refute(Unit{}, Unit{})
