@@ -34,6 +34,7 @@ jobs:
       - run: bun bend/bend2/main.ts FieldOrder.bend --verdict
       - run: bun bend/bend2/main.ts tests/certificate.bend --verdict
       - run: bun bend/bend2/main.ts tests/strict.bend --verdict
+      - run: bun bend/bend2/main.ts Bits.bend --verdict
       - run: python3 -S -m unittest discover -s tools -p test_certificate.py
       - name: Reject a non-Cauchy sequence
         run: |

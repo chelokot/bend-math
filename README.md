@@ -56,7 +56,9 @@ into `a < b` as often as needed.
 as a sum of natural multiples of fact products times squares, plus polynomial
 multiples of equations; Bend checks the identity with `FieldRing.equal` and
 each term's sign. `tools/certificate.py` searches for such a certificate with
-an exact linear program and prints it as Bend terms:
+a linear program over the products reduced modulo the equations, solved
+exactly on the support that HiGHS (from SciPy, when installed) picks with the
+smallest coefficients, and prints it as Bend terms:
 
 ```sh
 python3 tools/certificate.py problem.json
@@ -64,6 +66,10 @@ python3 tools/certificate.py problem.json
 
 where `problem.json` lists `names`, `facts`, `equations`, `goal` and optional
 `squares`, each as a polynomial over the names.
+
+`Bits.bend` counts and combines lists of decided facts: `Bits.Holds(b)` turns
+a Boolean into a copyable proof, and its lemmas bound the number of set bits
+and combine bit masks, so a finite case analysis is a computation on Booleans.
 
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
