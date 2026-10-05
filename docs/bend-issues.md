@@ -30,3 +30,29 @@ in the kernel with `expected: an annotated term` on an inlined
 
 Workaround: none needed. The generic theorem and the model are checked
 separately, which is what a statement over every ordered field requires.
+
+## 3. `--verdict` copies every template into each root that reaches it
+
+Bend 2.0.35 (`79df8d9c`). `safe_book` checks each def at its own opaque
+constants for its `~` parameters, and a call `B(~A~F, …)` from root `A`
+emits a fresh copy of `B` and of everything `B` reaches. The kernel input is
+therefore the sum over defs of their transitive closure. In
+`square-packing-archive`, the s(6) lower bound is 2.4MB of Bend, and its
+kernel input is 518MB: `Stromquist.extra_base` alone appears 18 times at 4MB.
+
+Workaround: merge defs that share heavy dependencies into one generic def
+(one `center` over its row indices instead of six), and give the check
+enough memory.
+
+## 4. Kernel names grow by one character per instance
+
+Bend 2.0.35 (`79df8d9c`). `fresh` in `bend2/safe.ts` appends `_` until a
+name is free, so the k-th instance of a def is named with k underscores and
+the names cost quadratic space in the number of instances (and the loop
+quadratic time). In the 518MB input above, 295MB is underscores of `qvv_…`
+names; `FieldRing.of_nat` has about 300 instances. A counter per base name
+would keep names short.
+
+Workaround: none on the library side. The kernel check of that book peaks
+at about 17GB in `bun` and 19GB in the kernel, which runs while `bun` still
+holds its memory.
