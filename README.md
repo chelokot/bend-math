@@ -71,6 +71,11 @@ where `problem.json` lists `names`, `facts`, `equations`, `goal` and optional
 a Boolean into a copyable proof, and its lemmas bound the number of set bits
 and combine bit masks, so a finite case analysis is a computation on Booleans.
 
+`Intervals.bend` bounds the total length of intervals in `[a, b]` whose
+interiors are pairwise disjoint by `b − a`. It is the one-dimensional step of
+area arguments: the vertical sections of interior-disjoint squares at one
+abscissa are such intervals.
+
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
 sorted monomials and is accepted only when the normal forms are identical. Its
