@@ -37,6 +37,8 @@ jobs:
       - run: bun bend/bend2/main.ts Bits.bend --verdict
       - run: bun bend/bend2/main.ts Intervals.bend --verdict
       - run: bun bend/bend2/main.ts tests/intervals.bend --verdict
+      - run: bun bend/bend2/main.ts Sweep.bend --verdict
+      - run: bun bend/bend2/main.ts tests/sweep.bend --verdict
       - run: python3 -S -m unittest discover -s tools -p test_certificate.py
       - name: Reject a non-Cauchy sequence
         run: |

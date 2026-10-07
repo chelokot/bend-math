@@ -76,6 +76,14 @@ interiors are pairwise disjoint by `b − a`. It is the one-dimensional step of
 area arguments: the vertical sections of interior-disjoint squares at one
 abscissa are such intervals.
 
+`Sweep.bend` turns a local monotonicity into a global one. A
+`Sweep.Potential` over a finite list of breakpoints holds a function `G` and a
+proof that `G(b) ≤ G(a)` whenever `a ≤ b` and no breakpoint lies strictly
+between them. `Sweep.monotone` then proves `G(b) ≤ G(a)` for every `a ≤ b` by
+splitting at the breakpoints inside. The function and the proof travel in one
+record because the kernel takes a template argument of function type only
+inside data.
+
 `Ring.bend` proves polynomial identities over `Nat`. A proof writes both sides
 as expression trees over a list of values; `Ring.equal` normalizes them to
 sorted monomials and is accepted only when the normal forms are identical. Its
