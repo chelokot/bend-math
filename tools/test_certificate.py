@@ -22,6 +22,10 @@ class CertificateSearch(unittest.TestCase):
         found = certificate.search(["half"], [], ["half + half - 1"], "half", [], 1)
         self.assertEqual(found[0], 1)
 
+    def test_inverse_cancels_on_the_unit_circle(self):
+        found = certificate.search(["c", "s", "i"], ["-i"], ["c^2 + s^2 - 1", "c*i - 1"], "-c", ["c"], 2)
+        self.assertIsNotNone(found)
+
     def test_false_goal_has_no_certificate(self):
         self.assertIsNone(certificate.search(["x"], ["x"], [], "1 - x", [], 2))
 

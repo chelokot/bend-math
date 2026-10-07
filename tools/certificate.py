@@ -315,6 +315,40 @@ def reduce(p, equation_polys, lead_monomials, key):
     return remainder, quotients
 
 
+def scaled(multipliers, factor):
+    return {j: mul(factor, p) for j, p in multipliers.items()}
+
+
+def summed(left, right):
+    out = dict(left)
+    for j, p in right.items():
+        out[j] = add(out.get(j, {}), p)
+    return out
+
+
+def basis_of(equation_polys, key):
+    """A Groebner basis of the equations along `key`, each element with the multipliers of the equations that give it."""
+    elements = [(e, {j: {tuple(0 for _ in next(iter(e))): Fraction(1)}}) for j, e in enumerate(equation_polys) if e]
+    pairs = list(itertools.combinations(range(len(elements)), 2))
+    while pairs:
+        (f, from_f), (g, from_g) = (elements[i] for i in pairs.pop())
+        lead_f, lead_g = max(f, key=key), max(g, key=key)
+        if not any(a and b for a, b in zip(lead_f, lead_g)):
+            continue
+        common = tuple(max(a, b) for a, b in zip(lead_f, lead_g))
+        factor_f = {tuple(a - b for a, b in zip(common, lead_f)): 1 / f[lead_f]}
+        factor_g = {tuple(a - b for a, b in zip(common, lead_g)): -1 / g[lead_g]}
+        polys = [p for p, _ in elements]
+        remainder, quotients = reduce(add(mul(factor_f, f), mul(factor_g, g)), polys, [max(p, key=key) for p in polys], key)
+        if remainder:
+            origin = summed(scaled(from_f, factor_f), scaled(from_g, factor_g))
+            for (_, from_element), quotient in zip(elements, quotients):
+                origin = summed(origin, scaled(from_element, {m: -c for m, c in quotient.items()}))
+            pairs += [(i, len(elements)) for i in range(len(elements))]
+            elements.append((remainder, origin))
+    return elements
+
+
 class Product:
     """A product of facts times a square, expanded only when needed."""
 
@@ -352,8 +386,10 @@ def lcm(values):
 
 def reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, products):
     key = monomial_key(ranking(equation_polys, count))
-    lead_monomials = [max(e, key=key) for e in equation_polys]
-    normal = lambda p: reduce(p, equation_polys, lead_monomials, key)[0]
+    basis = basis_of(equation_polys, key)
+    basis_polys = [p for p, _ in basis]
+    lead_monomials = [max(p, key=key) for p in basis_polys]
+    normal = lambda p: reduce(p, basis_polys, lead_monomials, key)[0]
     goal_form = normal(goal_poly)
     fact_forms = [normal(f) for f in fact_polys]
     square_forms = [normal(mul(q, q)) for q in square_polys]
@@ -375,12 +411,16 @@ def reduced_search(count, fact_polys, square_polys, equation_polys, goal_poly, p
             integer = weight * scale
             terms.append((integer, chosen, k))
             residual = add(residual, {m: -integer * c for m, c in p.items()})
-    remainder, quotients = reduce(residual, equation_polys, lead_monomials, key)
+    remainder, quotients = reduce(residual, basis_polys, lead_monomials, key)
     if remainder:
         return None
-    extra_scale = lcm(c.denominator for q in quotients for c in q.values())
+    multipliers = {}
+    for (_, origin), quotient in zip(basis, quotients):
+        multipliers = summed(multipliers, scaled(origin, quotient))
+    multipliers = {j: q for j, q in multipliers.items() if q}
+    extra_scale = lcm(c.denominator for q in multipliers.values() for c in q.values())
     terms = [(int(c * extra_scale), chosen, k) for c, chosen, k in terms]
-    multipliers = {j: {m: c * extra_scale for m, c in q.items()} for j, q in enumerate(quotients) if q}
+    multipliers = {j: {m: c * extra_scale for m, c in q.items()} for j, q in multipliers.items()}
     return scale * extra_scale, terms, multipliers
 
 
