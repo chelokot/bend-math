@@ -56,9 +56,9 @@ into `a < b` as often as needed.
 as a sum of natural multiples of fact products times squares, plus polynomial
 multiples of equations; Bend checks the identity with `FieldRing.equal` and
 each term's sign. `tools/certificate.py` searches for such a certificate with
-a linear program over the products reduced modulo the equations, solved
-exactly on the support that HiGHS (from SciPy, when installed) picks with the
-smallest coefficients, and prints it as Bend terms:
+a linear program over the products reduced modulo a Gröbner basis of the
+equations, solved exactly on the support that HiGHS (from SciPy, when
+installed) picks with the smallest coefficients, and prints it as Bend terms:
 
 ```sh
 python3 tools/certificate.py problem.json
